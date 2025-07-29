@@ -16,10 +16,8 @@ import java.util.Map;
 @Component
 public class JwtService {
     public final String niewzykle_wazny_secret_jwt;
-    private final int duration;
-    public JwtService(@Value("${jwt.niewzykle_wazny_secret_jwt}") String niewzykle_wazny_secret_jwt, @Value("${jwt.duration}") int duration){
+    public JwtService(@Value("${jwt.niewzykle_wazny_secret_jwt}") String niewzykle_wazny_secret_jwt){
         this.niewzykle_wazny_secret_jwt = niewzykle_wazny_secret_jwt;
-        this.duration=duration;
     }
     public void validateToken(final String token) throws ExpiredJwtException, IllegalArgumentException {
         Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token);
@@ -28,7 +26,7 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(niewzykle_wazny_secret_jwt);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    public String generate_JWT_Token(String username){
+    public String generate_JWT_Token(String username, int duration){
         Map<String, Object> claims = new HashMap<>();
         return create_JWT_Token(claims,username,duration);
     }
@@ -51,6 +49,6 @@ public class JwtService {
     }
     public String refreshToken(final String token, int duration){
         String username = getSubject(token);
-        return generate_JWT_Token(username);
+        return generate_JWT_Token(username, duration);
     }
 }
