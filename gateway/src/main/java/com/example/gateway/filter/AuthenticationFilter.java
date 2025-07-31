@@ -1,7 +1,6 @@
 package com.example.gateway.filter;
 
 import com.example.gateway.conf.Carousel;
-import com.example.gateway.utils.JWTUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
