@@ -46,12 +46,14 @@ public class UserService {
             for(Cookie value: Arrays.stream(request.getCookies()).toList()){
                 if(value.getName().equals("Authorization")){
                     token=value.getValue();
-
                 }
                 else if(value.getName().equals("refresh")){
                     refresh=value.getValue();
                 }
             }
+        }
+        else{
+            throw new IllegalArgumentException("Brak tokena");
         }
         try{
             jwtService.validateToken(token);

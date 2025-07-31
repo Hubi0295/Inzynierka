@@ -3,9 +3,11 @@ package com.example.auth.conf;
 import com.example.auth.entity.User;
 import com.example.auth.entity.UserRole;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 public class OwnUserDetails implements UserDetails {
     private String username;
@@ -18,7 +20,7 @@ public class OwnUserDetails implements UserDetails {
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
