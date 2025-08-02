@@ -6,6 +6,6 @@ CREATE TABLE "users"
     password     varchar not null,
     email  varchar not null,
     role      varchar not null,
-    isEnable    boolean DEFAULT false,
-    isLock boolean DEFAULT true
+    isEnable    boolean DEFAULT true,
+    isLock boolean DEFAULT false
 );

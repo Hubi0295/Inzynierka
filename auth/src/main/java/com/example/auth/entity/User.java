@@ -79,7 +79,7 @@ public class User implements UserDetails{
         return isEnable;
     }
     public void generateUuid(){
-        if(uuid==null || uuid.equals("")){
+        if(uuid==null || uuid.isEmpty()){
             setUuid(UUID.randomUUID().toString());
         }
     }

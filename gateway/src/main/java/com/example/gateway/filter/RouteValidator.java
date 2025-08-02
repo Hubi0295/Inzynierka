@@ -1,8 +1,7 @@
 package com.example.gateway.filter;
-
-import com.example.auth.entity.UserRole;
 import com.example.gateway.entity.Endpoint;
 import com.example.gateway.entity.HttpMethod;
+import com.example.gateway.entity.UserRole;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +15,12 @@ public class RouteValidator {
     public Set<Endpoint> openApiEndpoints = new HashSet<>(List.of(
             new Endpoint("/auth/users", HttpMethod.POST,UserRole.USER),
             new Endpoint("/auth/login", HttpMethod.POST,UserRole.USER),
-            new Endpoint("/auth/validate", HttpMethod.GET,UserRole.USER)
+            new Endpoint("/auth/validate", HttpMethod.GET,UserRole.USER),
+            new Endpoint("/auth/logout", HttpMethod.GET, UserRole.USER),
+            new Endpoint("/auth/auto-login", HttpMethod.GET, UserRole.USER),
+            new Endpoint("/auth/logged-in", HttpMethod.GET, UserRole.USER),
+            new Endpoint("/auth/authorize", HttpMethod.GET, UserRole.USER),
+            new Endpoint("/api/gateway", HttpMethod.POST, UserRole.USER)
             )
     );
     private Set<Endpoint> adminEndpoints = new HashSet<>();

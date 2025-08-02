@@ -14,7 +14,12 @@ public class Carousel {
     int currentIndex = 0;
     public Carousel(EurekaClient eurekaClient){
         this.eurekaClient = eurekaClient;
-        initAuthCarousel();
+        try{
+            initAuthCarousel();
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
         events();
     }
     public String getUriAuth(){
@@ -31,13 +36,23 @@ public class Carousel {
     }
     private void events(){
         eurekaClient.registerEventListener(eurekaEvent ->{
-            initAuthCarousel();
+            try{
+                initAuthCarousel();
+            }
+            catch (NullPointerException e){
+                e.printStackTrace();
+            }
         });
         eurekaClient.unregisterEventListener(eurekaEvent -> {
-            initAuthCarousel();
+            try{
+                initAuthCarousel();
+            }
+            catch (NullPointerException e){
+                e.printStackTrace();
+            }
         });
     }
-    public void initAuthCarousel(){
-        instances = eurekaClient.getApplication("auth").getInstances();
+    public void initAuthCarousel() throws NullPointerException{
+        instances = eurekaClient.getApplication("AUTHS").getInstances();
     }
 }

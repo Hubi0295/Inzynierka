@@ -1,6 +1,4 @@
 package com.example.gateway.entity;
-import com.example.auth.entity.UserRole;
-import com.example.gateway.entity.HttpMethod;
 import java.util.Objects;
 
 public class Endpoint {

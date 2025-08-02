@@ -40,5 +40,20 @@ public class AuthController {
             return ResponseEntity.status(401).body(new Response(e.getMessage()));
         }
     }
-
+    @RequestMapping(path="/logout", method = RequestMethod.GET)
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
+        return userService.logout(request,response);
+    }
+    @RequestMapping(path="/auto-login", method = RequestMethod.GET)
+    public ResponseEntity<?> autoLogin(HttpServletRequest request, HttpServletResponse response){
+        return userService.autoLogin(request,response);
+    }
+    @RequestMapping(path="/logged-in", method = RequestMethod.GET)
+    public ResponseEntity<?> loggedIn(HttpServletRequest request, HttpServletResponse response){
+        return userService.loggedIn(request,response);
+    }
+    @RequestMapping(path="/authorize", method = RequestMethod.GET)
+    public ResponseEntity<?> authorize(HttpServletRequest request, HttpServletResponse response){
+        return userService.authorize(request,response);
+    }
 }
