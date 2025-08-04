@@ -29,7 +29,8 @@ public class UserConf {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login","/api/auth/logged-in")
+                .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login",
+                "/api/auth/authorize")
                 .permitAll()
                 .and()
                 .build();

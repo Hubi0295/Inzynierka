@@ -14,7 +14,6 @@ public class CookieService {
     public Cookie removeCookie(Cookie[] cookies, String name){
         for(Cookie cookie: cookies){
             if (cookie.getName().equals(name)){
-                cookie.setPath("/");
                 cookie.setMaxAge(0);
                 cookie.setHttpOnly(true);
                 return cookie;

@@ -66,9 +66,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
                         ResponseEntity<String> response;
                         if (validator.isAdmin.test(exchange.getRequest())){
-                            response = template.exchange("http://"+carousel.getUriAuth()+"/api/v1/auth/authorize", HttpMethod.GET,entity, String.class);
+                            response = template.exchange("http://"+carousel.getUriAuth()+"/api/auth/authorize", HttpMethod.GET,entity, String.class);
                         }else {
-                            response = template.exchange("http://" + carousel.getUriAuth() + "/api/v1/auth/validate", HttpMethod.GET, entity, String.class);
+                            response = template.exchange("http://" + carousel.getUriAuth() + "/api/auth/validate", HttpMethod.GET, entity, String.class);
                         }
                         if (response.getStatusCode() == HttpStatus.OK){
                             List<String> cookiesList = response.getHeaders().get(HttpHeaders.SET_COOKIE);

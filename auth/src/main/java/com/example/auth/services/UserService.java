@@ -159,22 +159,15 @@ public class UserService {
     }
     }
 
-    public ResponseEntity<?> loggedIn(HttpServletRequest request, HttpServletResponse response) {
-        try{
-            validate_JWT_Token(request,response);
-            return ResponseEntity.ok(new Response("true"));
-        }
-        catch (ExpiredJwtException | IllegalArgumentException exception){
-            return ResponseEntity.ok(new Response("false"));
-        }
-    }
 
     public ResponseEntity<?> authorize(HttpServletRequest request, HttpServletResponse response) {
         try {
             validate_JWT_Token(request, response);
+            System.out.println("HERE 1");
             String token = null;
             String refresh = null;
             if (request.getCookies() != null) {
+                System.out.println("HERE 2");
                 for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
                     if (cookie.getName().equals("Authorization")) {
                         token = cookie.getValue();
@@ -183,9 +176,11 @@ public class UserService {
                     }
                 }
             } else {
+                System.out.println("HERE 3");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token nie istnieje"));
             }
             if (token != null && !token.isEmpty()) {
+                System.out.println("HERE 4");
                 String username = jwtService.getSubject(token);
                 User user = userRepository.findUserByUsernameAndIsAdmin(username).orElse(null);
                 if (user != null) {
@@ -193,6 +188,7 @@ public class UserService {
                 }
             }
             else if (refresh != null && !refresh.isEmpty()) {
+                System.out.println("HERE 5");
                 String username = jwtService.getSubject(refresh);
                 User user = userRepository.findUserByUsernameAndIsAdmin(username).orElse(null);
                 if (user != null) {
@@ -200,11 +196,14 @@ public class UserService {
                 }
             }
             else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena admina"));
+                System.out.println("HERE 6");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Uzytkownik nie istenieje w bazie"));
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Uzytkownik nie istenieje w bazie"));
+            System.out.println("HERE 7");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena admina"));
         }
         catch (ExpiredJwtException | IllegalArgumentException exception) {
+            System.out.println("HERE 8");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena lub token nie wazny"));
         }
     }
