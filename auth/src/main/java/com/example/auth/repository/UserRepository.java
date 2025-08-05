@@ -13,8 +13,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User> findUserByUsername(String login);
     Optional<User> findUserByEmail(String email);
-    @Query("SELECT u FROM User u WHERE u.username = :username AND u.role = com.example.auth.entity.UserRole.ADMIN")
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.role = com.example.auth.entity.UserType.ADMIN")
     Optional<User> findUserByUsernameAndIsAdmin(@Param("username") String username);
-//    @Query(nativeQuery = true, value = "SELECT * FROM users WHERE username = :username AND role = 'ADMIN'")
-//    Optional<User> findUserByUsernameAndIsAdmin(@Param("username") String username);
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.role = com.example.auth.entity.UserType.SUPERVISOR")
+    Optional<User> findUserByUsernameAndIsSupervisor(@Param("username") String username);
 }

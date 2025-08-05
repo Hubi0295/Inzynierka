@@ -23,6 +23,6 @@ public class UserRegisterDTO {
     @Length(min = 10 ,max = 50, message = "Haslo powinno mieć pomiędzy 10 a 50 znaków")
     private String password;
     @NotNull(message = "Rola użytkownika jest wymagana")
-    private UserRole userRole;
+    private UserType userType;
 
 }

@@ -4,9 +4,9 @@ import java.util.Objects;
 public class Endpoint {
     private  String url;
     private HttpMethod httpMethod;
-    private UserRole role;
+    private UserType role;
 
-    public Endpoint(String url, HttpMethod httpMethod, UserRole role) {
+    public Endpoint(String url, HttpMethod httpMethod, UserType role) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.role = role;
@@ -20,7 +20,7 @@ public class Endpoint {
         return httpMethod;
     }
 
-    public UserRole getRole() {
+    public UserType getRole() {
         return role;
     }
 

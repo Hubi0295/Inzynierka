@@ -30,7 +30,8 @@ public class UserConf {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login",
-                "/api/auth/authorize")
+                "/api/auth/authorizeAdmin",
+                        "/api/auth/authorizeSupervisor")
                 .permitAll()
                 .and()
                 .build();

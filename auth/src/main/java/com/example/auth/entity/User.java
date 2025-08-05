@@ -28,12 +28,12 @@ public class User implements UserDetails{
     private String email;
     @Getter
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private UserType role;
     @Column(name="isenable")
     private boolean isEnable;
     @Column(name="islock")
     private boolean isLock;
-    public User(long id, String uuid, String username, String password, String email, UserRole role, boolean isEnable, boolean isLock) {
+    public User(long id, String uuid, String username, String password, String email, UserType role, boolean isEnable, boolean isLock) {
         this.id = id;
         this.uuid = uuid;
         this.username = username;

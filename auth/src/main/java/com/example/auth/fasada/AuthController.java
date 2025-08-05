@@ -24,7 +24,7 @@ public class AuthController {
     @RequestMapping(path = "/users", method = RequestMethod.POST)
     public ResponseEntity<?> addUser(@Valid @RequestBody UserRegisterDTO user){
         userService.register(user);
-        return ResponseEntity.ok().body(new AuthResponse("Dodano użytkownika",user.getUsername(),user.getUserRole().toString(),user.getEmail()));
+        return ResponseEntity.ok().body(new AuthResponse("Dodano użytkownika",user.getUsername(),user.getUserType().toString(),user.getEmail()));
     }
     @RequestMapping(path="/login", method = RequestMethod.POST)
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO, HttpServletResponse response){
@@ -48,8 +48,12 @@ public class AuthController {
     public ResponseEntity<?> autoLogin(HttpServletRequest request, HttpServletResponse response){
         return userService.autoLogin(request,response);
     }
-    @RequestMapping(path="/authorize", method = RequestMethod.GET)
-    public ResponseEntity<?> authorize(HttpServletRequest request, HttpServletResponse response){
-        return userService.authorize(request,response);
+    @RequestMapping(path="/authorizeAdmin", method = RequestMethod.GET)
+    public ResponseEntity<?> authorizeAdmin(HttpServletRequest request, HttpServletResponse response){
+        return userService.authorizeAdmin(request,response);
+    }
+    @RequestMapping(path="/authorizeSupervisor", method = RequestMethod.GET)
+    public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request, HttpServletResponse response){
+        return userService.authorizeSupervisor(request,response);
     }
 }

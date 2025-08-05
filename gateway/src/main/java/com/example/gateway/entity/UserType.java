@@ -1,6 +1,6 @@
 package com.example.gateway.entity;
 
-public enum UserRole {
+public enum UserType {
     USER,
     ADMIN,
     SUPERVISOR

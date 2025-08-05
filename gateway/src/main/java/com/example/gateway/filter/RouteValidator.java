@@ -1,7 +1,7 @@
 package com.example.gateway.filter;
 import com.example.gateway.entity.Endpoint;
 import com.example.gateway.entity.HttpMethod;
-import com.example.gateway.entity.UserRole;
+import com.example.gateway.entity.UserType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
@@ -13,23 +13,24 @@ import java.util.function.Predicate;
 @Component
 public class RouteValidator {
     public Set<Endpoint> openApiEndpoints = new HashSet<>(List.of(
-            new Endpoint("/auth/users", HttpMethod.POST,UserRole.USER),
-            new Endpoint("/auth/login", HttpMethod.POST,UserRole.USER),
-            new Endpoint("/auth/validate", HttpMethod.GET,UserRole.USER),
-            new Endpoint("/auth/logout", HttpMethod.GET, UserRole.USER),
-            new Endpoint("/auth/auto-login", HttpMethod.GET, UserRole.USER),
-            new Endpoint("/auth/authorize", HttpMethod.GET, UserRole.USER),
-            new Endpoint("/api/gateway", HttpMethod.POST, UserRole.USER)
+            new Endpoint("/auth/users", HttpMethod.POST, UserType.USER),
+            new Endpoint("/auth/login", HttpMethod.POST, UserType.USER),
+            new Endpoint("/auth/validate", HttpMethod.GET, UserType.USER),
+            new Endpoint("/auth/logout", HttpMethod.GET, UserType.USER),
+            new Endpoint("/auth/auto-login", HttpMethod.GET, UserType.USER),
+            new Endpoint("/auth/authorizeAdmin", HttpMethod.GET, UserType.USER),
+            new Endpoint("/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
             )
     );
     private Set<Endpoint> adminEndpoints = new HashSet<>();
 
     public void addEndpoints(List<Endpoint> endpointList){
         for (Endpoint endpoint: endpointList){
-            if (endpoint.getRole().name().equals(UserRole.ADMIN.name())) {
+            if (endpoint.getRole().name().equals(UserType.ADMIN.name())) {
                 adminEndpoints.add(endpoint);
             }
-            if (endpoint.getRole().name().equals(UserRole.USER.name())) {
+            if (endpoint.getRole().name().equals(UserType.USER.name())) {
                 openApiEndpoints.add(endpoint);
             }
 

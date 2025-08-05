@@ -1,7 +1,7 @@
 package com.example.auth.conf;
 
 import com.example.auth.entity.User;
-import com.example.auth.entity.UserRole;
+import com.example.auth.entity.UserType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +12,7 @@ import java.util.List;
 public class OwnUserDetails implements UserDetails {
     private String username;
     private String password;
-    private UserRole role;
+    private UserType role;
     public OwnUserDetails(User user){
         this.password=user.getPassword();
         this.username=user.getUsername();

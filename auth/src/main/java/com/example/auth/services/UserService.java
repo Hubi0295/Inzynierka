@@ -88,7 +88,7 @@ public class UserService {
         user.setUsername(userRegisterDTO.getUsername());
         user.setPassword(userRegisterDTO.getPassword());
         user.setEmail(userRegisterDTO.getEmail());
-        user.setRole(userRegisterDTO.getUserRole());
+        user.setRole(userRegisterDTO.getUserType());
         user.setEnable(true);
         user.setLock(false);
         user.generateUuid();
@@ -103,13 +103,7 @@ public class UserService {
                 Cookie refreshCookie = cookieService.generateCookie("refresh", generate_JWT_Token(userProvided.getUsername(), refreshDuration), refreshDuration);
                 response.addCookie(cookie);
                 response.addCookie(refreshCookie);
-                return ResponseEntity.ok(
-                        UserRegisterDTO
-                                .builder()
-                                .username(user.getUsername())
-                                .userRole(user.getRole())
-                                .email(user.getEmail())
-                                .build());
+                return ResponseEntity.ok(new AuthResponse("Success",user.getUsername(),user.getRole().toString(),user.getEmail()));
             }
             else{
                 return ResponseEntity.ok(new Response("Nie udało się zalogować, niepoprawne dane"));
@@ -147,8 +141,8 @@ public class UserService {
             return ResponseEntity.ok(new AuthResponse(
                     "Zalogowano tokenem refresh",
                     user.getUsername(),
-                    user.getEmail(),
-                    user.getRole().toString()
+                    user.getRole().toString(),
+                    user.getEmail()
             ));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie ma takiego uzytkownika w bazie"));
@@ -160,7 +154,7 @@ public class UserService {
     }
 
 
-    public ResponseEntity<?> authorize(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> authorizeAdmin(HttpServletRequest request, HttpServletResponse response) {
         try {
             validate_JWT_Token(request, response);
             System.out.println("HERE 1");
@@ -191,6 +185,53 @@ public class UserService {
                 System.out.println("HERE 5");
                 String username = jwtService.getSubject(refresh);
                 User user = userRepository.findUserByUsernameAndIsAdmin(username).orElse(null);
+                if (user != null) {
+                    return ResponseEntity.ok(new Response("Witamy adminie"));
+                }
+            }
+            else {
+                System.out.println("HERE 6");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Uzytkownik nie istenieje w bazie"));
+            }
+            System.out.println("HERE 7");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena admina"));
+        }
+        catch (ExpiredJwtException | IllegalArgumentException exception) {
+            System.out.println("HERE 8");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena lub token nie wazny"));
+        }
+    }
+    public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            validate_JWT_Token(request, response);
+            System.out.println("HERE 1");
+            String token = null;
+            String refresh = null;
+            if (request.getCookies() != null) {
+                System.out.println("HERE 2");
+                for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
+                    if (cookie.getName().equals("Authorization")) {
+                        token = cookie.getValue();
+                    } else if (cookie.getName().equals("refresh")) {
+                        refresh = cookie.getValue();
+                    }
+                }
+            } else {
+                System.out.println("HERE 3");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token nie istnieje"));
+            }
+            if (token != null && !token.isEmpty()) {
+                System.out.println("HERE 4");
+                String username = jwtService.getSubject(token);
+                User user = userRepository.findUserByUsernameAndIsSupervisor(username).orElse(null);
+                if (user != null) {
+                    return ResponseEntity.ok(new Response("Witamy Kierowniku"));
+                }
+            }
+            else if (refresh != null && !refresh.isEmpty()) {
+                System.out.println("HERE 5");
+                String username = jwtService.getSubject(refresh);
+                User user = userRepository.findUserByUsernameAndIsSupervisor(username).orElse(null);
                 if (user != null) {
                     return ResponseEntity.ok(new Response("Witamy adminie"));
                 }
