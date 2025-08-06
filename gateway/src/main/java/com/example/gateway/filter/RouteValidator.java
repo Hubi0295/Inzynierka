@@ -13,13 +13,13 @@ import java.util.function.Predicate;
 @Component
 public class RouteValidator {
     public Set<Endpoint> openApiEndpoints = new HashSet<>(List.of(
-            new Endpoint("/auth/users", HttpMethod.POST, UserType.USER),
-            new Endpoint("/auth/login", HttpMethod.POST, UserType.USER),
-            new Endpoint("/auth/validate", HttpMethod.GET, UserType.USER),
-            new Endpoint("/auth/logout", HttpMethod.GET, UserType.USER),
-            new Endpoint("/auth/auto-login", HttpMethod.GET, UserType.USER),
-            new Endpoint("/auth/authorizeAdmin", HttpMethod.GET, UserType.USER),
-            new Endpoint("/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/users", HttpMethod.POST, UserType.USER),
+            new Endpoint("/api/auth/login", HttpMethod.POST, UserType.USER),
+            new Endpoint("/api/auth/validate", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/logout", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/auto-login", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/authorizeAdmin", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
             )
     );

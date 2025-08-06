@@ -31,6 +31,8 @@ public class JwtService {
         return create_JWT_Token(claims,username,duration);
     }
     public String create_JWT_Token(Map<String,Object> claims, String username,int duration){
+        System.out.println(new Date(System.currentTimeMillis()));
+        System.out.println(new Date(System.currentTimeMillis()+duration));
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
@@ -46,9 +48,5 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
-    }
-    public String refreshToken(final String token, int duration){
-        String username = getSubject(token);
-        return generate_JWT_Token(username, duration);
     }
 }

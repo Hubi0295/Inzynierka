@@ -40,41 +40,20 @@ public class UserService {
 
         return jwtService.generate_JWT_Token(username,duration);
     }
-    public String validate_JWT_Token(HttpServletRequest request, HttpServletResponse response) throws ExpiredJwtException, IllegalArgumentException {
+    public String validate_JWT_Token(HttpServletRequest request) throws IllegalArgumentException, ExpiredJwtException {
         String token = null;
-        String refresh = null;
         if(request.getCookies() != null){
             for(Cookie value: Arrays.stream(request.getCookies()).toList()){
                 if(value.getName().equals("Authorization")){
                     token=value.getValue();
                 }
-                else if(value.getName().equals("refresh")){
-                    refresh=value.getValue();
-                    System.out.println("Tutaj 1");
-                }
             }
         }
         else{
-            System.out.println("Tutaj 2");
-            throw new IllegalArgumentException("Brak tokena");
+            throw new IllegalArgumentException("Brak ważnego tokena authorization");
         }
-        try{
-            System.out.println("Tutaj 3");
-            jwtService.validateToken(token);
-            System.out.println("Tutaj 4");
-            return jwtService.getSubject(token);
-        }
-        catch (IllegalArgumentException | ExpiredJwtException e){
-            System.out.println("Tutaj 5");
-            jwtService.validateToken(refresh);
-            Cookie cookie = cookieService.generateCookie("Authorization", jwtService.refreshToken(refresh, duration), duration);
-            Cookie refreshCookie = cookieService.generateCookie("refresh", jwtService.refreshToken(refresh,refreshDuration), refreshDuration);
-            response.addCookie(cookie);
-            response.addCookie(refreshCookie);
-            System.out.println("Tutaj 6");
-            System.out.println(jwtService.getSubject(cookie.getValue()));
-            return jwtService.getSubject(cookie.getValue());
-        }
+        jwtService.validateToken(token);
+        return jwtService.getSubject(token);
     }
 
     public void register(UserRegisterDTO userRegisterDTO) {
@@ -127,125 +106,54 @@ public class UserService {
     }
 
     public ResponseEntity<?> autoLogin(HttpServletRequest request, HttpServletResponse response) {
-    try{
-        validate_JWT_Token(request,response);
-        String refresh= null;
-        for(Cookie cookie: Arrays.stream(request.getCookies()).toList()){
-            if(cookie.getName().equals("refresh")){
-                refresh = cookie.getValue();
-            }
-        }
-        String login = jwtService.getSubject(refresh);
-        User user = userRepository.findUserByUsername(login).orElse(null);
-        if(user != null){
-            return ResponseEntity.ok(new AuthResponse(
-                    "Zalogowano tokenem refresh",
-                    user.getUsername(),
-                    user.getRole().toString(),
-                    user.getEmail()
-            ));
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie ma takiego uzytkownika w bazie"));
-
-    }
-    catch (ExpiredJwtException | IllegalArgumentException e){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token refresh przestał być ważny"));
-    }
-    }
-
-
-    public ResponseEntity<?> authorizeAdmin(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            validate_JWT_Token(request, response);
-            System.out.println("HERE 1");
-            String token = null;
             String refresh = null;
-            if (request.getCookies() != null) {
-                System.out.println("HERE 2");
-                for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
-                    if (cookie.getName().equals("Authorization")) {
-                        token = cookie.getValue();
-                    } else if (cookie.getName().equals("refresh")) {
-                        refresh = cookie.getValue();
-                    }
+            if(request.getCookies()==null){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak ciasteczek"));
+            }
+            for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
+                if (cookie.getName().equals("refresh")) {
+                    refresh = cookie.getValue();
                 }
+            }
+            if (refresh == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak refresh tokena"));
+            }
+            jwtService.validateToken(refresh);
+            String login = jwtService.getSubject(refresh);
+            User user = userRepository.findUserByUsername(login).orElse(null);
+            if (user != null) {
+                Cookie cookie = cookieService.generateCookie("Authorization", generate_JWT_Token(login,duration), duration);
+                response.addCookie(cookie);
+                return ResponseEntity.ok(new AuthResponse(
+                        "Zalogowano tokenem refresh",
+                        user.getUsername(),
+                        user.getRole().toString(),
+                        user.getEmail()
+                ));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie ma takiego uzytkownika w bazie"));
+    }
+
+
+    public ResponseEntity<?> authorize(HttpServletRequest request, UserType userType) {
+        try {
+            String login = validate_JWT_Token(request);
+            User user = userRepository.findUserByUsernameAndHasPremission(login, userType).orElse(null);
+            if (user != null) {
+                return validateAuthority(user,"Uzyskano dostęp","Nie ma takiego uzytkownika w bazie");
             } else {
-                System.out.println("HERE 3");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token nie istnieje"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak odpowiedniego tokena"));
             }
-            if (token != null && !token.isEmpty()) {
-                System.out.println("HERE 4");
-                String username = jwtService.getSubject(token);
-                User user = userRepository.findUserByUsernameAndIsAdmin(username).orElse(null);
-                if (user != null) {
-                    return ResponseEntity.ok(new Response("Witamy adminie"));
-                }
-            }
-            else if (refresh != null && !refresh.isEmpty()) {
-                System.out.println("HERE 5");
-                String username = jwtService.getSubject(refresh);
-                User user = userRepository.findUserByUsernameAndIsAdmin(username).orElse(null);
-                if (user != null) {
-                    return ResponseEntity.ok(new Response("Witamy adminie"));
-                }
-            }
-            else {
-                System.out.println("HERE 6");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Uzytkownik nie istenieje w bazie"));
-            }
-            System.out.println("HERE 7");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena admina"));
         }
-        catch (ExpiredJwtException | IllegalArgumentException exception) {
-            System.out.println("HERE 8");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena lub token nie wazny"));
+        catch (IllegalArgumentException | ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak odpowiedniego tokena lub token wygasł"));
         }
     }
-    public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            validate_JWT_Token(request, response);
-            System.out.println("HERE 1");
-            String token = null;
-            String refresh = null;
-            if (request.getCookies() != null) {
-                System.out.println("HERE 2");
-                for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
-                    if (cookie.getName().equals("Authorization")) {
-                        token = cookie.getValue();
-                    } else if (cookie.getName().equals("refresh")) {
-                        refresh = cookie.getValue();
-                    }
-                }
-            } else {
-                System.out.println("HERE 3");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token nie istnieje"));
-            }
-            if (token != null && !token.isEmpty()) {
-                System.out.println("HERE 4");
-                String username = jwtService.getSubject(token);
-                User user = userRepository.findUserByUsernameAndIsSupervisor(username).orElse(null);
-                if (user != null) {
-                    return ResponseEntity.ok(new Response("Witamy Kierowniku"));
-                }
-            }
-            else if (refresh != null && !refresh.isEmpty()) {
-                System.out.println("HERE 5");
-                String username = jwtService.getSubject(refresh);
-                User user = userRepository.findUserByUsernameAndIsSupervisor(username).orElse(null);
-                if (user != null) {
-                    return ResponseEntity.ok(new Response("Witamy adminie"));
-                }
-            }
-            else {
-                System.out.println("HERE 6");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Uzytkownik nie istenieje w bazie"));
-            }
-            System.out.println("HERE 7");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena admina"));
-        }
-        catch (ExpiredJwtException | IllegalArgumentException exception) {
-            System.out.println("HERE 8");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena lub token nie wazny"));
+    public ResponseEntity<?> validateAuthority(User user, String successMessage, String errorMessage){
+        if (user != null) {
+            return ResponseEntity.ok().body(new AuthResponse(successMessage,user.getUsername(),user.getRole().toString(),user.getEmail()));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(errorMessage));
         }
     }
 }

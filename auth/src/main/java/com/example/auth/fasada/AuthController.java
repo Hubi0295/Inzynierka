@@ -31,14 +31,15 @@ public class AuthController {
         return userService.login(userLoginDTO,response);
     }
     @RequestMapping(path="/validate", method = RequestMethod.GET)
-    public ResponseEntity<Response> validateToken(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<Response> validateToken(HttpServletRequest request){
         try{
-            String userName = userService.validate_JWT_Token(request, response);
+            String userName = userService.validate_JWT_Token(request);
             return ResponseEntity.ok(new Response(userName));
         }
-        catch (IllegalArgumentException | ExpiredJwtException e){
-            return ResponseEntity.status(401).body(new Response(e.getMessage()));
+        catch (ExpiredJwtException | IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak tokena"));
         }
+
     }
     @RequestMapping(path="/logout", method = RequestMethod.GET)
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
@@ -49,11 +50,11 @@ public class AuthController {
         return userService.autoLogin(request,response);
     }
     @RequestMapping(path="/authorizeAdmin", method = RequestMethod.GET)
-    public ResponseEntity<?> authorizeAdmin(HttpServletRequest request, HttpServletResponse response){
-        return userService.authorizeAdmin(request,response);
+    public ResponseEntity<?> authorizeAdmin(HttpServletRequest request){
+        return userService.authorize(request,UserType.ADMIN);
     }
     @RequestMapping(path="/authorizeSupervisor", method = RequestMethod.GET)
-    public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request, HttpServletResponse response){
-        return userService.authorizeSupervisor(request,response);
+    public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request){
+        return userService.authorize(request,UserType.SUPERVISOR);
     }
 }
