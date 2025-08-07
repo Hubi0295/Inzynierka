@@ -9,10 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-
 @Component
 public class RouteValidator {
     public Set<Endpoint> openApiEndpoints = new HashSet<>(List.of(
+            new Endpoint("/v3/api-docs/**", HttpMethod.GET, UserType.USER),
+            new Endpoint("/swagger-ui/**", HttpMethod.GET, UserType.USER),
+            new Endpoint("/swagger-ui.html", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/users", HttpMethod.POST, UserType.USER),
             new Endpoint("/api/auth/login", HttpMethod.POST, UserType.USER),
             new Endpoint("/api/auth/validate", HttpMethod.GET, UserType.USER),
@@ -20,7 +22,12 @@ public class RouteValidator {
             new Endpoint("/api/auth/auto-login", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/authorizeAdmin", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
-            new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
+            new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER),
+            new Endpoint("/api/auth/users/{uuid}", HttpMethod.PUT, UserType.USER),
+            new Endpoint("/api/auth/users/{uuid}", HttpMethod.DELETE, UserType.USER),
+            new Endpoint("/api/auth/users/{uuid}/role", HttpMethod.PATCH, UserType.USER),
+            new Endpoint("/api/auth/users/{uuid}", HttpMethod.GET, UserType.USER),
+            new Endpoint("/api/auth/users", HttpMethod.GET, UserType.USER)
             )
     );
     private Set<Endpoint> adminEndpoints = new HashSet<>();

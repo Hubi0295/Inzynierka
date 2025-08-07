@@ -29,7 +29,10 @@ public class UserConf {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login", "/api/auth/authorizeAdmin", "/api/auth/authorizeSupervisor")
+                .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login", "/api/auth/authorizeAdmin", "/api/auth/authorizeSupervisor","/api/auth/users/{uuid}","/api/auth/users/{uuid}/role",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html")
                 .permitAll()
                 .and()
                 .build();

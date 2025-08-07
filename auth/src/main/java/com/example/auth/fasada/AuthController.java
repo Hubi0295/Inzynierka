@@ -57,4 +57,25 @@ public class AuthController {
     public ResponseEntity<?> authorizeSupervisor(HttpServletRequest request){
         return userService.authorize(request,UserType.SUPERVISOR);
     }
+    @RequestMapping(path="/users/{uuid}", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserRegisterDTO userRegisterDTO, @PathVariable("uuid") String uuid){
+        return userService.updateUser(userRegisterDTO,uuid);
+    }
+    @RequestMapping(path="/users/{uuid}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteUser(@PathVariable("uuid") String uuid){
+        return userService.deleteUser(uuid);
+    }
+    @RequestMapping(path="/users/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> getUserInfo(@PathVariable("uuid") String uuid){
+        return userService.getUserInfo(uuid);
+    }
+    @RequestMapping(path="/users", method = RequestMethod.GET)
+    public ResponseEntity<?> getUsersInfo(){
+        return userService.getUsersInfo();
+    }
+    @RequestMapping(path="/users/{uuid}/role", method = RequestMethod.PATCH)
+    public ResponseEntity<?> changeRole(@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){
+        return userService.changeRole(uuid, userChangeRoleDTO.getUserType());
+    }
+
 }

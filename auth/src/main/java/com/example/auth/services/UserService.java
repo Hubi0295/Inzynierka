@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -154,6 +155,66 @@ public class UserService {
             return ResponseEntity.ok().body(new AuthResponse(successMessage,user.getUsername(),user.getRole().toString(),user.getEmail()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(errorMessage));
+        }
+    }
+
+    public ResponseEntity<?> updateUser(UserRegisterDTO userRegisterDTO, String uuid) {
+        System.out.println(uuid);
+        int result = userRepository.updateUserByUuid(
+                userRegisterDTO.getEmail(),
+                userRegisterDTO.getUsername(),
+                passwordEncoder.encode(userRegisterDTO.getPassword()),
+                userRegisterDTO.getUserType(),
+                uuid);
+        System.out.println(result);
+        if(result==1){
+            return ResponseEntity.ok(new AuthResponse("Pomyślnie zaaktualizowano użytkownika",userRegisterDTO.getUsername(),userRegisterDTO.getUserType().toString(),userRegisterDTO.getEmail()));
+
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano akutalizacji uzytkownika"));
+        }
+    }
+
+    public ResponseEntity<?> deleteUser(String uuid) {
+        int result = userRepository.deleteUserByUuid(uuid);
+        if(result==1){
+            return ResponseEntity.ok(new Response("Pomyślnie usunieto użytkownika"));
+
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano usuniecia uzytkownika"));
+        }
+    }
+
+    public ResponseEntity<?> getUserInfo(String uuid) {
+        User user = userRepository.findUserByUuid(uuid).orElse(null);
+        if(user!=null){
+            return ResponseEntity.ok(user);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany uuid"));
+        }
+    }
+
+    public ResponseEntity<?> getUsersInfo() {
+        List<User> listOfUsers = userRepository.findAll();
+        if(listOfUsers!=null){
+            return ResponseEntity.ok(listOfUsers);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Brak uzytkownikow w bazie"));
+        }
+    }
+
+    public ResponseEntity<?> changeRole(String uuid, UserType userType) {
+        int result = userRepository.changeUserRole(uuid,userType);
+        if(result==1){
+            return ResponseEntity.ok(new Response("Pomyślnie zmieniono role użytkownika"));
+
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano zmiany roli uzytkownika"));
         }
     }
 }
