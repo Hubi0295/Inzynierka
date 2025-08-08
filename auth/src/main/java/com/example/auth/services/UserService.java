@@ -158,8 +158,17 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> updateUser(UserRegisterDTO userRegisterDTO, String uuid) {
-        System.out.println(uuid);
+    public ResponseEntity<?> updateUser(HttpServletRequest request, UserRegisterDTO userRegisterDTO, String uuid) {
+        try{
+            validate_JWT_Token(request);
+        }
+        catch(IllegalArgumentException | ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token niewłaściwy lub wygasł"));
+        }
+        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
+        if(r.getStatusCode()!=HttpStatus.OK){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        }
         int result = userRepository.updateUserByUuid(
                 userRegisterDTO.getEmail(),
                 userRegisterDTO.getUsername(),
@@ -176,7 +185,17 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> deleteUser(String uuid) {
+    public ResponseEntity<?> deleteUser(HttpServletRequest request,String uuid) {
+        try{
+            validate_JWT_Token(request);
+        }
+        catch(IllegalArgumentException | ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token niewłaściwy lub wygasł"));
+        }
+        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
+        if(r.getStatusCode()!=HttpStatus.OK){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        }
         int result = userRepository.deleteUserByUuid(uuid);
         if(result==1){
             return ResponseEntity.ok(new Response("Pomyślnie usunieto użytkownika"));
@@ -187,7 +206,17 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> getUserInfo(String uuid) {
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request,String uuid) {
+        try{
+            validate_JWT_Token(request);
+        }
+        catch(IllegalArgumentException | ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token niewłaściwy lub wygasł"));
+        }
+        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
+        if(r.getStatusCode()!=HttpStatus.OK){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        }
         User user = userRepository.findUserByUuid(uuid).orElse(null);
         if(user!=null){
             return ResponseEntity.ok(user);
@@ -197,7 +226,22 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> getUsersInfo() {
+    public ResponseEntity<?> getUsersInfo(HttpServletRequest request) {
+        try{
+            System.out.println("POCZATEK");
+            String u = validate_JWT_Token(request);
+            System.out.println(u);
+        }
+        catch(IllegalArgumentException | ExpiredJwtException e){
+            System.out.println("HERE1");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token niewłaściwy lub wygasł"));
+        }
+        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
+        if(r.getStatusCode()!=HttpStatus.OK){
+            System.out.println("HERE2"+r.getStatusCode());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        }
+        System.out.println("HERE3");
         List<User> listOfUsers = userRepository.findAll();
         if(listOfUsers!=null){
             return ResponseEntity.ok(listOfUsers);
@@ -207,7 +251,17 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> changeRole(String uuid, UserType userType) {
+    public ResponseEntity<?> changeRole(HttpServletRequest request, String uuid, UserType userType) {
+        try{
+            validate_JWT_Token(request);
+        }
+        catch(IllegalArgumentException | ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Token niewłaściwy lub wygasł"));
+        }
+        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
+        if(r.getStatusCode()!=HttpStatus.OK){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        }
         int result = userRepository.changeUserRole(uuid,userType);
         if(result==1){
             return ResponseEntity.ok(new Response("Pomyślnie zmieniono role użytkownika"));
@@ -217,4 +271,5 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano zmiany roli uzytkownika"));
         }
     }
+
 }

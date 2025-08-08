@@ -58,24 +58,24 @@ public class AuthController {
         return userService.authorize(request,UserType.SUPERVISOR);
     }
     @RequestMapping(path="/users/{uuid}", method = RequestMethod.PUT)
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserRegisterDTO userRegisterDTO, @PathVariable("uuid") String uuid){
-        return userService.updateUser(userRegisterDTO,uuid);
+    public ResponseEntity<?> updateUser(HttpServletRequest request,@Valid @RequestBody UserRegisterDTO userRegisterDTO, @PathVariable("uuid") String uuid){
+        return userService.updateUser(request,userRegisterDTO,uuid);
     }
     @RequestMapping(path="/users/{uuid}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUser(@PathVariable("uuid") String uuid){
-        return userService.deleteUser(uuid);
+    public ResponseEntity<?> deleteUser(HttpServletRequest request,@PathVariable("uuid") String uuid){
+        return userService.deleteUser(request,uuid);
     }
     @RequestMapping(path="/users/{uuid}", method = RequestMethod.GET)
-    public ResponseEntity<?> getUserInfo(@PathVariable("uuid") String uuid){
-        return userService.getUserInfo(uuid);
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request,@PathVariable("uuid") String uuid){
+        return userService.getUserInfo(request,uuid);
     }
     @RequestMapping(path="/users", method = RequestMethod.GET)
-    public ResponseEntity<?> getUsersInfo(){
-        return userService.getUsersInfo();
+    public ResponseEntity<?> getUsersInfo(HttpServletRequest request){
+        return userService.getUsersInfo(request);
     }
     @RequestMapping(path="/users/{uuid}/role", method = RequestMethod.PATCH)
-    public ResponseEntity<?> changeRole(@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){
-        return userService.changeRole(uuid, userChangeRoleDTO.getUserType());
+    public ResponseEntity<?> changeRole(HttpServletRequest request,@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){
+        return userService.changeRole(request, uuid, userChangeRoleDTO.getUserType());
     }
 
 }

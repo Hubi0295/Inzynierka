@@ -30,7 +30,8 @@ public class RouteValidator {
             new Endpoint("/api/auth/users", HttpMethod.GET, UserType.USER)
             )
     );
-    private Set<Endpoint> adminEndpoints = new HashSet<>();
+    private Set<Endpoint> adminEndpoints = new HashSet<>(List.of(
+    ));
 
     public void addEndpoints(List<Endpoint> endpointList){
         for (Endpoint endpoint: endpointList){
