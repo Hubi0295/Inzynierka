@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -79,24 +80,34 @@ public class UserService {
         System.out.println("PRZED");
         if(user!=null){
             System.out.println("PO");
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userProvided.getUsername(), userProvided.getPassword()));
+            Authentication authentication = null;
+            try{
+                authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userProvided.getUsername(), userProvided.getPassword()));
+            }
+            catch(AuthenticationException e){
+
+            }
             System.out.println("1");
-            if(authentication.isAuthenticated()) {
-                System.out.println("2");
-                Cookie cookie = cookieService.generateCookie("Authorization", generate_JWT_Token(userProvided.getUsername(),duration), duration);
-                Cookie refreshCookie = cookieService.generateCookie("refresh", generate_JWT_Token(userProvided.getUsername(), refreshDuration), refreshDuration);
-                response.addCookie(cookie);
-                response.addCookie(refreshCookie);
-                return ResponseEntity.ok(new AuthResponse("Success",user.getUsername(),user.getRole().toString(),user.getEmail()));
+            if(authentication != null){
+                if(authentication.isAuthenticated()) {
+                    System.out.println("2");
+                    Cookie cookie = cookieService.generateCookie("Authorization", generate_JWT_Token(userProvided.getUsername(),duration), duration);
+                    Cookie refreshCookie = cookieService.generateCookie("refresh", generate_JWT_Token(userProvided.getUsername(), refreshDuration), refreshDuration);
+                    response.addCookie(cookie);
+                    response.addCookie(refreshCookie);
+                    return ResponseEntity.ok(new AuthResponse("Success",user.getUsername(),user.getRole().toString(),user.getEmail()));
+                }
+                else{
+                    System.out.println("3");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie udało się zalogować, niepoprawne dane"));
+                }
             }
-            else{
-                System.out.println("3");
-                return ResponseEntity.ok(new Response("Nie udało się zalogować, niepoprawne dane"));
-            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie udało się zalogować, niepoprawne dane"));
+
         }
         else{
             System.out.println("TUTAJ");
-            return ResponseEntity.ok(new Response("Brak takiego użytkownika w bazie danych"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Brak takiego użytkownika w bazie danych"));
         }
     }
 
