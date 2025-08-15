@@ -35,20 +35,23 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
-
+            System.out.println("1");
             if (validator.isSecure.test(exchange.getRequest())) {
-
+                System.out.println("2");
                 List<HttpCookie> authCookies = exchange.getRequest().getCookies().get(AUTH_COOKIE_NAME);
                 List<HttpCookie> refreshCookies = exchange.getRequest().getCookies().get(REFRESH_COOKIE_NAME);
 
                 if (authCookies == null || authCookies.isEmpty() || refreshCookies == null || refreshCookies.isEmpty()) {
+                    System.out.println("3");
                     return unauthorizedRawJson(exchange.getResponse(), "");
                 }
+                System.out.println("4");
 
                 HttpCookie authCookie = authCookies.get(0);
                 HttpCookie refreshCookie = refreshCookies.get(0);
 
                 try {
+                    System.out.println("5");
                     String cookiesHeader = authCookie.getName() + "=" + authCookie.getValue() + ";" +
                             refreshCookie.getName() + "=" + refreshCookie.getValue();
 
@@ -57,13 +60,16 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
                     ResponseEntity<String> response;
+                    System.out.println("6");
 
                     if (validator.isAdmin.test(exchange.getRequest())) {
+                        System.out.println("7");
                         response = template.exchange(
                                 "http://" + carousel.getUriAuth() + "/api/auth/authorizeAdmin",
                                 HttpMethod.GET, entity, String.class
                         );
                     } else if (validator.isSupervisor.test(exchange.getRequest())) {
+                        System.out.println("8");
                         response = template.exchange(
                                 "http://" + carousel.getUriAuth() + "/api/auth/authorizeSupervisor",
                                 HttpMethod.GET, entity, String.class
@@ -94,7 +100,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     }
 
                 } catch (HttpClientErrorException e) {
-                    String body = e.getResponseBodyAsString(); // to będzie czysty JSON z Auth
+                    String body = e.getResponseBodyAsString();
                     return unauthorizedRawJson(exchange.getResponse(), body);
                 }
             }

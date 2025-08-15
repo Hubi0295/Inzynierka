@@ -1,7 +1,7 @@
 package com.example.gateway.fasada;
 
-import com.example.gateway.entity.Response;
-import com.example.gateway.entity.Endpoint;
+import org.example.entity.Endpoint;
+import org.example.entity.Response;
 import com.example.gateway.filter.RouteValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,9 @@ public class RegistrationController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity<?> register(@RequestBody List<Endpoint> endpoints){
         routeValidator.addEndpoints(endpoints);
+        for(Endpoint e: endpoints){
+            System.out.println(e.getUrl());
+        }
         return ResponseEntity.ok(new Response("Pomyslnie zarejestrowano endpoint"));
     }
 }

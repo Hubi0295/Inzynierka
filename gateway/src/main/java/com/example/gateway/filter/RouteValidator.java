@@ -1,8 +1,9 @@
 package com.example.gateway.filter;
 
-import com.example.gateway.entity.Endpoint;
-import com.example.gateway.entity.HttpMethod;
-import com.example.gateway.entity.UserType;
+import org.example.entity.Endpoint;
+import org.example.entity.HttpMethod;
+import org.example.entity.Response;
+import org.example.entity.UserType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;

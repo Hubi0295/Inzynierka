@@ -1,4 +1,4 @@
-package com.example.gateway.entity;
+package org.example.entity;
 
 public enum HttpMethod {
     GET,

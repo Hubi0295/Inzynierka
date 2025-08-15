@@ -1,10 +1,14 @@
-package com.example.gateway.entity;
+package org.example.entity;
+
 import java.util.Objects;
 
 public class Endpoint {
     private  String url;
     private HttpMethod httpMethod;
     private UserType role;
+    public Endpoint(){
+
+    }
 
     public Endpoint(String url, HttpMethod httpMethod, UserType role) {
         this.url = url;

@@ -11,6 +11,7 @@
         <module name="auth" />
         <module name="eureka" />
         <module name="contractorService" />
+        <module name="RegisterEndpoints" />
         <module name="warehouse" />
         <module name="gateway" />
         <module name="productService" />
