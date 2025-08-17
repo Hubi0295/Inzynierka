@@ -1,7 +1,10 @@
 package com.example.warehouse.service;
 
+
 import com.example.warehouse.entity.*;
 import com.example.warehouse.repository.*;
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.Response;
@@ -22,8 +25,27 @@ public class WarehouseService {
     private final ShelfRepository shelfRepository;
     private final SpotRepository spotRepository;
     private final WarehouseRepository warehouseRepository;
+//    public ResponseEntity<?> validateToken(HttpServletRequest httpRequest){
+//        try{
+//            userService.validate_JWT_Token(httpRequest);
+//            ResponseEntity<?> r = userService.authorize(httpRequest, UserType.SUPERVISOR);
+//            if(r.getStatusCode()!=HttpStatus.OK){
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Token nie posiada uprawnień"));
+//            }
+//            else{
+//                return ResponseEntity.ok(new Response("Poprawny token"));
+//            }
+//        }
+//        catch (ExpiredJwtException | IllegalArgumentException e){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Token nie wazny"));
+//        }
+//    }
 
-    public ResponseEntity<?> addWarehouse(HttpServletResponse httpRequest, StructureDTO structureDTO) {
+    public ResponseEntity<?> addWarehouse(HttpServletRequest httpRequest, StructureDTO structureDTO) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         String name = structureDTO.getName();
         Warehouse warehouse = new Warehouse();
         warehouse.setName(name);
@@ -31,7 +53,11 @@ public class WarehouseService {
         return ResponseEntity.ok().body(new Response("Utworzono magazyn"+name));
     }
 
-    public ResponseEntity<?> addHall(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> addHall(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         String name = structureDTO.getName();
         Warehouse warehouse = warehouseRepository.findWarehouseByUuid(uuid).orElse(null);
         if(warehouse!= null){
@@ -46,7 +72,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> addShelf(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> addShelf(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         String name = structureDTO.getName();
         Hall hall = hallRepository.findHallByUuid(uuid).orElse(null);
         if(hall != null){
@@ -61,7 +91,11 @@ public class WarehouseService {
         }
     }
     @Transactional
-    public ResponseEntity<?> addSpot(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> addSpot(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         String name = structureDTO.getName();
         Shelf shelf = shelfRepository.findShelfByUuid(uuid).orElse(null);
         if(shelf != null){
@@ -83,7 +117,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> deleteSpot(HttpServletResponse httpRequest, UUID uuid) {
+    public ResponseEntity<?> deleteSpot(HttpServletRequest httpRequest, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Spot spot = spotRepository.findSpotByUuid(uuid).orElse(null);
         if (spot != null) {
             spotRepository.delete(spot);
@@ -94,7 +132,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> updateSpot(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> updateSpot(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Spot spot = spotRepository.findSpotByUuid(uuid).orElse(null);
         if (spot != null) {
             spot.setName(structureDTO.getName());
@@ -106,7 +148,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> deleteShelf(HttpServletResponse httpRequest, UUID uuid) {
+    public ResponseEntity<?> deleteShelf(HttpServletRequest httpRequest, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Shelf shelf = shelfRepository.findShelfByUuid(uuid).orElse(null);
         if (shelf != null) {
             shelfRepository.delete(shelf);
@@ -117,7 +163,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> updateShelf(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> updateShelf(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Shelf shelf = shelfRepository.findShelfByUuid(uuid).orElse(null);
         if (shelf != null) {
             shelf.setName(structureDTO.getName());
@@ -129,7 +179,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> deleteHall(HttpServletResponse httpRequest, UUID uuid) {
+    public ResponseEntity<?> deleteHall(HttpServletRequest httpRequest, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Hall hall = hallRepository.findHallByUuid(uuid).orElse(null);
         if (hall != null) {
             hallRepository.delete(hall);
@@ -140,7 +194,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> updateHall(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> updateHall(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Hall hall = hallRepository.findHallByUuid(uuid).orElse(null);
         if (hall != null) {
             hall.setName(structureDTO.getName());
@@ -152,7 +210,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> deleteWarehouse(HttpServletResponse httpRequest, UUID uuid) {
+    public ResponseEntity<?> deleteWarehouse(HttpServletRequest httpRequest, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Warehouse warehouse = warehouseRepository.findWarehouseByUuid(uuid).orElse(null);
         if (warehouse != null) {
             warehouseRepository.delete(warehouse);
@@ -163,7 +225,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> updateWarehouse(HttpServletResponse httpRequest, StructureDTO structureDTO, UUID uuid) {
+    public ResponseEntity<?> updateWarehouse(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         Warehouse warehouse = warehouseRepository.findWarehouseByUuid(uuid).orElse(null);
         if (warehouse != null) {
             warehouse.setName(structureDTO.getName());
@@ -175,7 +241,11 @@ public class WarehouseService {
         }
     }
 
-    public ResponseEntity<?> stateOfWarehouses(HttpServletResponse httpRequest) {
+    public ResponseEntity<?> stateOfWarehouses(HttpServletRequest httpRequest) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
         List<Location> locations = locationRepository.findAll();
         List<LocationDTO> result = locations.stream().map(loc -> new LocationDTO(
                 loc.getWarehouse().getUuid(),
@@ -191,8 +261,17 @@ public class WarehouseService {
         return ResponseEntity.ok(result);
     }
 
-    public ResponseEntity<?> stateOfWarehouseByUUID(HttpServletResponse httpRequest, UUID uuid) {
-        List<Location> locations = locationRepository.findByUuid(uuid).orElse(null);
+    public ResponseEntity<?> stateOfWarehouseByUUID(HttpServletRequest httpRequest, UUID uuid) {
+//        ResponseEntity<?> response = validateToken(httpRequest);
+//        if(response.getStatusCode()!=HttpStatus.OK){
+//            return response;
+//        }
+        Warehouse warehouse = warehouseRepository.findWarehouseByUuid(uuid).orElse(null);
+        if(warehouse==null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response("Nie znaleziono magazynu o podanym UUID"));
+        }
+        List<Location> locations = locationRepository.findLocationsByWarehouse(warehouse).orElse(null);
         if(locations!=null && locations.size()>0){
             List<LocationDTO> result = locations.stream().map(loc -> new LocationDTO(
                     loc.getWarehouse().getUuid(),

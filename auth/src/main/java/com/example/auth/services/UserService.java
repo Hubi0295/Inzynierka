@@ -38,6 +38,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.saveAndFlush(user);
     }
+
+
     public String generate_JWT_Token(String username, int duration){
 
         return jwtService.generate_JWT_Token(username,duration);

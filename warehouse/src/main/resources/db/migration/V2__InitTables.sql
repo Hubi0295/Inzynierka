@@ -55,7 +55,7 @@ CREATE TABLE locations (
             ON DELETE CASCADE,
     CONSTRAINT fk_location_shelf
         FOREIGN KEY (id_shelf)
-            REFERENCES shelfs (id)
+            REFERENCES shelves (id)
             ON DELETE CASCADE,
     CONSTRAINT fk_location_spot
         FOREIGN KEY (id_spot)

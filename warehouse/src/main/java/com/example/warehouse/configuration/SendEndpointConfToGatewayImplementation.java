@@ -23,19 +23,19 @@ public class SendEndpointConfToGatewayImplementation implements SendEndpointConf
     @Override
     public void initMap() {
         endpoints.add(new Endpoint("/api/warehouseManagement/warehouses", HttpMethod.POST, UserType.SUPERVISOR));
-        endpoints.add(new Endpoint("/api/warehouseManagement/warehouses/{uuid}", HttpMethod.PUT, UserType.SUPERVISOR));
+        endpoints.add(new Endpoint("/api/warehouseManagement/warehouses/{uuid}", HttpMethod.PATCH, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/warehouses/{uuid}", HttpMethod.DELETE, UserType.SUPERVISOR));
 
         endpoints.add(new Endpoint("/api/warehouseManagement/warehouses/{uuid}/halls", HttpMethod.POST, UserType.SUPERVISOR));
-        endpoints.add(new Endpoint("/api/warehouseManagement/halls/{uuid}", HttpMethod.PUT, UserType.SUPERVISOR));
+        endpoints.add(new Endpoint("/api/warehouseManagement/halls/{uuid}", HttpMethod.PATCH, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/halls/{uuid}", HttpMethod.DELETE, UserType.SUPERVISOR));
 
         endpoints.add(new Endpoint("/api/warehouseManagement/halls/{uuid}/shelves", HttpMethod.POST, UserType.SUPERVISOR));
-        endpoints.add(new Endpoint("/api/warehouseManagement/shelves/{uuid}", HttpMethod.PUT, UserType.SUPERVISOR));
+        endpoints.add(new Endpoint("/api/warehouseManagement/shelves/{uuid}", HttpMethod.PATCH, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/shelves/{uuid}", HttpMethod.DELETE, UserType.SUPERVISOR));
 
         endpoints.add(new Endpoint("/api/warehouseManagement/shelves/{uuid}/spots", HttpMethod.POST, UserType.SUPERVISOR));
-        endpoints.add(new Endpoint("/api/warehouseManagement/spots/{uuid}", HttpMethod.PUT, UserType.SUPERVISOR));
+        endpoints.add(new Endpoint("/api/warehouseManagement/spots/{uuid}", HttpMethod.PATCH, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/spots/{uuid}", HttpMethod.DELETE, UserType.SUPERVISOR));
     }
 
