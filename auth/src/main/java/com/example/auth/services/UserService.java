@@ -68,6 +68,8 @@ public class UserService {
             throw new UserExistsWithEmail("Użytkownik o takim mailu już istnieje w bazie danych");
         });
         User user = new User();
+        user.setName(userRegisterDTO.getName());
+        user.setSurname(userRegisterDTO.getSurname());
         user.setUsername(userRegisterDTO.getUsername());
         user.setPassword(userRegisterDTO.getPassword());
         user.setEmail(userRegisterDTO.getEmail());
@@ -97,7 +99,7 @@ public class UserService {
                     Cookie refreshCookie = cookieService.generateCookie("refresh", generate_JWT_Token(userProvided.getUsername(), refreshDuration), refreshDuration);
                     response.addCookie(cookie);
                     response.addCookie(refreshCookie);
-                    return ResponseEntity.ok(new AuthResponse("Success",user.getUsername(),user.getRole().toString(),user.getEmail()));
+                    return ResponseEntity.ok(new AuthResponse("Success",user.getName(),user.getSurname(),user.getUsername(),user.getRole().toString(),user.getEmail()));
                 }
                 else{
                     System.out.println("3");
@@ -145,7 +147,8 @@ public class UserService {
                 Cookie cookie = cookieService.generateCookie("Authorization", generate_JWT_Token(login,duration), duration);
                 response.addCookie(cookie);
                 return ResponseEntity.ok(new AuthResponse(
-                        "Zalogowano tokenem refresh",
+                        "Zalogowano tokenem refresh"
+                        ,user.getName(),user.getSurname(),
                         user.getUsername(),
                         user.getRole().toString(),
                         user.getEmail()
@@ -171,7 +174,7 @@ public class UserService {
     }
     public ResponseEntity<?> validateAuthority(User user, String successMessage, String errorMessage){
         if (user != null) {
-            return ResponseEntity.ok().body(new AuthResponse(successMessage,user.getUsername(),user.getRole().toString(),user.getEmail()));
+            return ResponseEntity.ok().body(new AuthResponse(successMessage,user.getName(),user.getSurname(),user.getUsername(),user.getRole().toString(),user.getEmail()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(errorMessage));
         }
@@ -196,7 +199,7 @@ public class UserService {
                 uuid);
         System.out.println(result);
         if(result==1){
-            return ResponseEntity.ok(new AuthResponse("Pomyślnie zaaktualizowano użytkownika",userRegisterDTO.getUsername(),userRegisterDTO.getUserType().toString(),userRegisterDTO.getEmail()));
+            return ResponseEntity.ok(new AuthResponse("Pomyślnie zaaktualizowano użytkownika",userRegisterDTO.getName(),userRegisterDTO.getSurname(),userRegisterDTO.getUsername(),userRegisterDTO.getUserType().toString(),userRegisterDTO.getEmail()));
 
         }
         else{
@@ -228,7 +231,7 @@ public class UserService {
         }
         User user = userRepository.findUserByUuid(uuid).orElse(null);
         if(user!=null){
-            UserInfoDTO userInfoDTO = new UserInfoDTO(user.getUuid(),user.getUsername(),user.getEmail(), user.getRole(), user.isEnabled(), !user.isAccountNonLocked());
+            UserInfoDTO userInfoDTO = new UserInfoDTO(user.getUuid(),user.getName(), user.getSurname(),user.getUsername(),user.getEmail(), user.getRole(), user.isEnabled(), !user.isAccountNonLocked());
             return ResponseEntity.ok(userInfoDTO);
         }
         else{
@@ -248,6 +251,8 @@ public class UserService {
                 .stream()
                 .map(e -> new UserInfoDTO(
                         e.getUuid(),
+                        e.getName(),
+                        e.getSurname(),
                         e.getUsername(),
                         e.getEmail(),
                         e.getRole(),

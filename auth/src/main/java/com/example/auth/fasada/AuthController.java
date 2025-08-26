@@ -24,7 +24,7 @@ public class AuthController {
     @RequestMapping(path = "/users", method = RequestMethod.POST)
     public ResponseEntity<?> addUser(@Valid @RequestBody UserRegisterDTO user){
         userService.register(user);
-        return ResponseEntity.ok().body(new AuthResponse("Dodano użytkownika",user.getUsername(),user.getUserType().toString(),user.getEmail()));
+        return ResponseEntity.ok().body(new AuthResponse("Dodano użytkownika",user.getName(), user.getSurname(),user.getUsername(),user.getUserType().toString(),user.getEmail()));
     }
     @RequestMapping(path="/login", method = RequestMethod.POST)
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO, HttpServletResponse response){

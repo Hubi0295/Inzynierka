@@ -23,6 +23,10 @@ public class User implements UserDetails{
     private long id;
     @Getter
     private String uuid;
+    @Getter
+    private String name;
+    @Getter
+    private String surname;
     private String username;
     private String password;
     @Getter
@@ -34,9 +38,11 @@ public class User implements UserDetails{
     private boolean isEnable;
     @Column(name="islock")
     private boolean isLock;
-    public User(long id, String uuid, String username, String password, String email, UserType role, boolean isEnable, boolean isLock) {
+    public User(long id, String uuid, String name, String surname,String username, String password, String email, UserType role, boolean isEnable, boolean isLock) {
         this.id = id;
         this.uuid = uuid;
+        this.name=name;
+        this.surname=surname;
         this.username = username;
         this.password = password;
         this.email = email;

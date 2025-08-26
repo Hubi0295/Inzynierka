@@ -9,6 +9,8 @@ import lombok.Setter;
 @Setter
 public class UserInfoDTO {
     String Uuid;
+    String name;
+    String surname;
     String username;
     String email;
     UserType userType;

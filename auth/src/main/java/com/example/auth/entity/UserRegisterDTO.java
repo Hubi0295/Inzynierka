@@ -16,6 +16,10 @@ public class UserRegisterDTO {
     @NotBlank(message = "Email jest wymagany")
     @Email
     private String email;
+    @NotBlank(message = "name jest wymagany")
+    private String name;
+    @NotBlank(message = "surname jest wymagany")
+    private String surname;
     @NotBlank(message = "Username jest wymagany")
     private String username;
     @JsonInclude(JsonInclude.Include.NON_NULL)
