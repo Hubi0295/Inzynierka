@@ -70,8 +70,10 @@ public class AuthController {
         return userService.getUserInfo(request,uuid);
     }
     @RequestMapping(path="/users", method = RequestMethod.GET)
-    public ResponseEntity<?> getUsersInfo(HttpServletRequest request){
-        return userService.getUsersInfo(request);
+    public ResponseEntity<?> getUsersInfo( HttpServletRequest request,
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "5") int size){
+        return userService.getUsersInfo(request,page,size);
     }
     @RequestMapping(path="/users/{uuid}/role", method = RequestMethod.PATCH)
     public ResponseEntity<?> changeRole(HttpServletRequest request,@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){

@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -239,16 +242,15 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> getUsersInfo(HttpServletRequest request) {
+    public ResponseEntity<?> getUsersInfo(HttpServletRequest request, int page, int size) {
         validate_JWT_Token(request);
-        ResponseEntity<?> r = authorize(request,UserType.ADMIN);
-        if(r.getStatusCode()!=HttpStatus.OK){
-            System.out.println("HERE2"+r.getStatusCode());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
+        ResponseEntity<?> r = authorize(request, UserType.ADMIN);
+        if (r.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response("Nie uzyskano dostepu"));
         }
-        System.out.println("HERE3");
-        List<UserInfoDTO> listOfUsers = userRepository.findAll()
-                .stream()
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserInfoDTO> usersPage = userRepository.findAll(pageable)
                 .map(e -> new UserInfoDTO(
                         e.getUuid(),
                         e.getName(),
@@ -258,13 +260,13 @@ public class UserService {
                         e.getRole(),
                         e.isEnabled(),
                         !e.isAccountNonLocked()
-                ))
-                .toList();
-        if(listOfUsers!=null){
-            return ResponseEntity.ok(listOfUsers);
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Brak uzytkownikow w bazie"));
+                ));
+
+        if (usersPage.hasContent()) {
+            return ResponseEntity.ok(usersPage);
+        } else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new Response("Brak użytkowników w bazie"));
         }
     }
 
