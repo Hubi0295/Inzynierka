@@ -56,8 +56,8 @@ public class Product {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Location location;
 
-
-    private long contractor_id;
+    @Column(name = "contractor_id")
+    private long contractor;
 
     @ManyToOne(optional = false)
     @JoinColumn(

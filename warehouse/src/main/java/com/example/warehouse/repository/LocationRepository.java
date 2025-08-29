@@ -10,4 +10,5 @@ import java.util.UUID;
 
 public interface LocationRepository extends JpaRepository<Location,Long> {
     Optional<List<Location>> findLocationsByWarehouse(Warehouse warehouse);
+    Optional<Location> findLocationById(long id);
 }
