@@ -21,7 +21,11 @@ public class confSec {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/products/"
+                .requestMatchers(
+                        "/api/products/",
+                        "/api/products/{uuid}",
+                        "/api/products/{rfid}/location",
+                        "/api/products/categories"
                 )
                 .permitAll()
                 .and()

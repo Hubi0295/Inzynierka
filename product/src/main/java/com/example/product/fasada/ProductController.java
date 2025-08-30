@@ -1,15 +1,15 @@
 package com.example.product.fasada;
 
+import com.example.product.entity.CategoryDTO;
 import com.example.product.entity.ProductDTO;
 import com.example.product.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,4 +20,36 @@ public class ProductController {
     public ResponseEntity<?> addProduct(@Valid @RequestBody ProductDTO productDTO, HttpServletRequest httpServletRequest){
         return productService.addProduct(productDTO, httpServletRequest);
     }
+    @RequestMapping(path="/{uuid}", method = RequestMethod.PUT)
+    public ResponseEntity<?> editProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable("uuid") UUID uuid, HttpServletRequest httpServletRequest){
+        return productService.editProduct(productDTO,uuid, httpServletRequest);
+    }
+    @RequestMapping(path="/{uuid}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteProduct(@PathVariable("uuid") UUID uuid){
+        return productService.deleteProduct(uuid);
+    }
+    @RequestMapping(path="/", method = RequestMethod.GET)
+    public ResponseEntity<?> showProducts(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size){
+        return productService.showProducts(page,size);
+    }
+
+    @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> showProductDetails(@PathVariable("uuid") UUID uuid){
+        return productService.showProductDetails(uuid);
+    }
+    @RequestMapping(value="/{rfid}/location", method = RequestMethod.GET)
+    public ResponseEntity<?> getLocationByRFID(@PathVariable("rfid") String rfid){
+        return productService.getLocationByRFID(rfid);
+    }
+    @RequestMapping(value = "/categories", method = RequestMethod.POST)
+    public ResponseEntity<?> addCategory(@Valid @RequestBody CategoryDTO categoryDTO){
+        return productService.addCategory(categoryDTO);
+    }
+    @RequestMapping(value = "/categories", method = RequestMethod.GET)
+    public ResponseEntity<?> getCategories(){
+        return productService.getCategories();
+    }
+
+
 }

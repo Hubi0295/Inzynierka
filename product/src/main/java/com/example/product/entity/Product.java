@@ -23,7 +23,7 @@ public class Product {
     @SequenceGenerator(name="products_id_seq", sequenceName = "products_id_seq", allocationSize = 1)
     private long id;
     private UUID uuid = UUID.randomUUID();
-    private long rfid;
+    private String rfid;
     private String name;
     private long product_receipt_id;
     private long product_issue_id;
@@ -37,7 +37,7 @@ public class Product {
     private Category category;
 
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(
             name="product_details_id",
             nullable = false,

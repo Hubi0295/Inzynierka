@@ -8,9 +8,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ProductDTO {
-    private int RFID;
+    private String rfid;
     private String name;
-    private Category category;
+    private int category;
     private String description;
     private float weight;
     private float height;

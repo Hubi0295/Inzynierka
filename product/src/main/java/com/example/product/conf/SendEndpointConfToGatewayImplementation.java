@@ -23,6 +23,13 @@ public class SendEndpointConfToGatewayImplementation implements SendEndpointConf
     @Override
     public void initMap() {
         endpoints.add(new Endpoint("/api/products",HttpMethod.POST,UserType.USER));
+        endpoints.add(new Endpoint("/api/products",HttpMethod.GET,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/{uuid}",HttpMethod.POST,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/{uuid}",HttpMethod.DELETE,UserType.SUPERVISOR));
+        endpoints.add(new Endpoint("/api/products/{uuid}",HttpMethod.GET,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/{rfid}/location",HttpMethod.GET,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/categories",HttpMethod.POST,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/categories",HttpMethod.GET,UserType.USER));
     }
 
     @Override
