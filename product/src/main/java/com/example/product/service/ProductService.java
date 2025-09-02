@@ -1,16 +1,14 @@
 package com.example.product.service;
 import com.example.auth.entity.Response;
 import com.example.auth.entity.User;
-import com.example.auth.entity.UserInfoDTO;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.services.JwtService;
-import com.example.auth.services.UserService;
 import com.example.product.entity.*;
 import com.example.product.repository.CategoryRepository;
 import com.example.product.repository.ProductDetailsRepository;
 import com.example.product.repository.ProductRepository;
-import com.example.warehouse.entity.Location;
-import com.example.warehouse.repository.LocationRepository;
+import com.example.warehouse.entity.Spot;
+import com.example.warehouse.repository.SpotRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +30,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductDetailsRepository productDetailsRepository;
-    private final LocationRepository locationRepository;
+    private final SpotRepository spotRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
@@ -49,9 +46,10 @@ public class ProductService {
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
-        Location location = locationRepository.findLocationById(productDTO.getLocation()).orElse(null);
-        if(location!=null){
-            product.setLocation(location);
+        Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
+        if(spot!=null){
+            product.setSpot(spot);
+            spotRepository.changeState(false,spot.getId());
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
@@ -97,9 +95,13 @@ public class ProductService {
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
-        Location location = locationRepository.findLocationById(productDTO.getLocation()).orElse(null);
-        if(location!=null){
-            product.setLocation(location);
+        Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
+        if(spot!=null){
+            if(spot.getId()!=product.getSpot().getId()){
+                spotRepository.changeState(true, product.getSpot().getId());
+                spotRepository.changeState(false,spot.getId());
+                product.setSpot(spot);
+            }
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
@@ -148,7 +150,7 @@ public class ProductService {
                         e.getRfid(),
                         e.getName(),
                         e.getCategory(),
-                        e.getLocation(),
+                        e.getSpot(),
                         e.getContractor()
                 ));
         if(productPage.hasContent()){
@@ -180,8 +182,8 @@ public class ProductService {
         if(product==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne RFID produktu"));
         }
-        Location location = product.getLocation();
-        return ResponseEntity.ok(location);
+        Spot spot = product.getSpot();
+        return ResponseEntity.ok(spot);
     }
 
     public ResponseEntity<?> addCategory(CategoryDTO categoryDTO) {

@@ -1,8 +1,6 @@
 package com.example.product;
 
 import com.example.auth.services.JwtService;
-import com.example.warehouse.entity.Location;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;

@@ -1,5 +1,6 @@
 package com.example.product.entity;
 
+import com.example.warehouse.entity.Spot;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import java.sql.Timestamp;
 import java.util.UUID;
-import com.example.warehouse.entity.Location;
+
 import com.example.auth.entity.User;
 @Entity
 @Table(name="products")
@@ -49,12 +50,12 @@ public class Product {
 
     @ManyToOne(optional = false)
     @JoinColumn(
-            name="location_id",
+            name="spot_id",
             nullable = false,
-            foreignKey = @ForeignKey(name="fk_product_location")
+            foreignKey = @ForeignKey(name="fk_product_spot")
     )
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Location location;
+    private Spot spot;
 
     @Column(name = "contractor_id")
     private long contractor;

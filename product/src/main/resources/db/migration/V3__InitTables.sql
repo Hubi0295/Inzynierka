@@ -20,7 +20,7 @@ CREATE TABLE products (
     product_issue_id int,
     category_id int not null,
     product_details_id int not null,
-    location_id int not null,
+    spot_id int not null,
     contractor_id int not null,
     user_id int not null,
     is_active boolean DEFAULT true,
@@ -34,9 +34,9 @@ CREATE TABLE products (
         FOREIGN KEY (category_id)
             REFERENCES categories (id)
             ON DELETE CASCADE,
-    CONSTRAINT fk_product_location
-        FOREIGN KEY (location_id)
-            REFERENCES Locations (id)
+    CONSTRAINT fk_product_spot
+        FOREIGN KEY (spot_id)
+            REFERENCES spots (id)
             ON DELETE CASCADE,
     CONSTRAINT fk_product_user
         FOREIGN KEY (user_id)

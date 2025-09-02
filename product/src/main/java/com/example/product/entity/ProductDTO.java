@@ -15,6 +15,6 @@ public class ProductDTO {
     private float weight;
     private float height;
     private float width;
-    private int location;
+    private int spot;
     private int contractor;
 }

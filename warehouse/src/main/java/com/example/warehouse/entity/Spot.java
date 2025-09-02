@@ -30,12 +30,14 @@ public class Spot {
     )
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Shelf shelf;
+    private boolean is_free;
 
-    public Spot(long id, UUID uuid, String name, Shelf shelf) {
+    public Spot(long id, UUID uuid, String name, Shelf shelf, Boolean is_free) {
         this.id = id;
         this.uuid = uuid;
         this.name = name;
         this.shelf = shelf;
+        this.is_free=is_free;
     }
 
 }
