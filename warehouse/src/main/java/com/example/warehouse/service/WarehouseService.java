@@ -206,4 +206,5 @@ public class WarehouseService {
                     .body(new Response("Nie znaleziono magazynu o podanym UUID"));
         }
     }
+
 }

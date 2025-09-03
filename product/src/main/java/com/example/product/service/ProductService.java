@@ -37,19 +37,19 @@ public class ProductService {
     private final ContractorRepository contractorRepository;
     private final JwtService jwtService;
 
-    public ResponseEntity<?> addProduct(ProductDTO productDTO, HttpServletRequest httpServletRequest){
+    public ResponseEntity<?> addProduct(ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
         Product product = new Product();
-        System.out.println(productDTO.getRfid());
-        product.setRfid(productDTO.getRfid());
-        product.setName(productDTO.getName());
-        Category category = categoryRepository.findById((long) productDTO.getCategory()).orElse(null);
+        System.out.println(productCreateDTO.getRfid());
+        product.setRfid(productCreateDTO.getRfid());
+        product.setName(productCreateDTO.getName());
+        Category category = categoryRepository.findById((long) productCreateDTO.getCategory()).orElse(null);
         if(category!=null){
             product.setCategory(category);
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
-        Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
+        Spot spot = spotRepository.findSpotById(productCreateDTO.getSpot()).orElse(null);
         if(spot!=null && spot.is_free()){
             product.setSpot(spot);
             spotRepository.changeState(false,spot.getId());
@@ -57,7 +57,7 @@ public class ProductService {
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
         }
-        Contractor contractor = contractorRepository.findById((long) productDTO.getContractor()).orElse(null);
+        Contractor contractor = contractorRepository.findById((long) productCreateDTO.getContractor()).orElse(null);
         if(contractor!=null){
             product.setContractor(contractor);
         }
@@ -77,10 +77,10 @@ public class ProductService {
         product.setUpdated_at(new Timestamp(System.currentTimeMillis()));
 
         ProductDetails productDetails = new ProductDetails();
-        productDetails.setDescription(productDTO.getDescription());
-        productDetails.setWeight(productDTO.getWeight());
-        productDetails.setWidth(productDTO.getWidth());
-        productDetails.setHeight(productDTO.getHeight());
+        productDetails.setDescription(productCreateDTO.getDescription());
+        productDetails.setWeight(productCreateDTO.getWeight());
+        productDetails.setWidth(productCreateDTO.getWidth());
+        productDetails.setHeight(productCreateDTO.getHeight());
         productDetails.setCreated_at(new Timestamp(System.currentTimeMillis()));
         productDetails.setUpdated_at(new Timestamp(System.currentTimeMillis()));
 
@@ -90,32 +90,21 @@ public class ProductService {
         return ResponseEntity.ok(new Response("Pomyślnie dodano produkt"));
     }
 
-    public ResponseEntity<?> editProduct(ProductDTO productDTO, UUID uuid, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> editProduct(ProductEditDTO productEditDTO, UUID uuid, HttpServletRequest httpServletRequest) {
         Product product = productRepository.findByUuid(uuid).orElse(null);
         if(product==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne UUID produktu"));
         }
-        product.setRfid(productDTO.getRfid());
-        product.setName(productDTO.getName());
-        Category category = categoryRepository.findById((long) productDTO.getCategory()).orElse(null);
+        product.setRfid(productEditDTO.getRfid());
+        product.setName(productEditDTO.getName());
+        Category category = categoryRepository.findById((long) productEditDTO.getCategory()).orElse(null);
         if(category!=null){
             product.setCategory(category);
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
-        Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
-        if(spot!=null && spot.is_free()){
-            if(spot.getId()!=product.getSpot().getId()){
-                spotRepository.changeState(true, product.getSpot().getId());
-                spotRepository.changeState(false,spot.getId());
-                product.setSpot(spot);
-            }
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
-        }
-        Contractor contractor = contractorRepository.findById((long) productDTO.getContractor()).orElse(null);
+        Contractor contractor = contractorRepository.findById((long) productEditDTO.getContractor()).orElse(null);
         if(contractor!=null){
             product.setContractor(contractor);
         }
@@ -137,10 +126,10 @@ public class ProductService {
         if(productDetails==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne szegóły produktu"));
         }
-        productDetails.setDescription(productDTO.getDescription());
-        productDetails.setWeight(productDTO.getWeight());
-        productDetails.setWidth(productDTO.getWidth());
-        productDetails.setHeight(productDTO.getHeight());
+        productDetails.setDescription(productEditDTO.getDescription());
+        productDetails.setWeight(productEditDTO.getWeight());
+        productDetails.setWidth(productEditDTO.getWidth());
+        productDetails.setHeight(productEditDTO.getHeight());
         productDetailsRepository.saveAndFlush(productDetails);
         product.setProductDetails(productDetails);
         productRepository.saveAndFlush(product);
@@ -150,10 +139,13 @@ public class ProductService {
 
     public ResponseEntity<?> deleteProduct(UUID uuid) {
         Product product = productRepository.findByUuid(uuid).orElse(null);
+
         if(product==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne UUID produktu"));
         }
         productRepository.delete(product);
+        productDetailsRepository.delete(product.getProductDetails());
+        spotRepository.changeState(true,product.getSpot().getId());
         return ResponseEntity.ok(new Response("Usunięto produkt"));
     }
 
@@ -211,5 +203,26 @@ public class ProductService {
     public ResponseEntity<?> getCategories() {
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok(categories);
+    }
+
+    public ResponseEntity<?> transfer(TrasnferDTO trasnferDTO) {
+        Product product = productRepository.findByRfid(trasnferDTO.getRFID()).orElse(null);
+        if(product!=null){
+            Spot spot = spotRepository.findSpotById(trasnferDTO.getSpot()).orElse(null);
+            if(spot!=null && spot.is_free()){
+                spotRepository.changeState(true,product.getSpot().getId());
+                product.setSpot(spot);
+                productRepository.saveAndFlush(product);
+                spotRepository.changeState(false,spot.getId());
+                return ResponseEntity.ok(new Response("Dokonano przesuniecia magazynowego produktu"));
+
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne RFID produktu"));
+        }
     }
 }

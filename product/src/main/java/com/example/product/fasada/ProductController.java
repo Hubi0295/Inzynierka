@@ -1,8 +1,10 @@
 package com.example.product.fasada;
 
 import com.example.product.entity.CategoryDTO;
-import com.example.product.entity.ProductDTO;
+import com.example.product.entity.ProductCreateDTO;
+import com.example.product.entity.ProductEditDTO;
 import com.example.product.service.ProductService;
+import com.example.product.entity.TrasnferDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +19,12 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
     @RequestMapping(path = "/",method = RequestMethod.POST)
-    public ResponseEntity<?> addProduct(@Valid @RequestBody ProductDTO productDTO, HttpServletRequest httpServletRequest){
-        return productService.addProduct(productDTO, httpServletRequest);
+    public ResponseEntity<?> addProduct(@Valid @RequestBody ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
+        return productService.addProduct(productCreateDTO, httpServletRequest);
     }
     @RequestMapping(path="/{uuid}", method = RequestMethod.PUT)
-    public ResponseEntity<?> editProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable("uuid") UUID uuid, HttpServletRequest httpServletRequest){
-        return productService.editProduct(productDTO,uuid, httpServletRequest);
+    public ResponseEntity<?> editProduct(@Valid @RequestBody ProductEditDTO productEditDTO, @PathVariable("uuid") UUID uuid, HttpServletRequest httpServletRequest){
+        return productService.editProduct(productEditDTO,uuid, httpServletRequest);
     }
     @RequestMapping(path="/{uuid}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteProduct(@PathVariable("uuid") UUID uuid){
@@ -51,5 +53,9 @@ public class ProductController {
         return productService.getCategories();
     }
 
+    @RequestMapping(path="/transfer", method = RequestMethod.POST)
+    public ResponseEntity<?> transfer(@RequestBody @Valid TrasnferDTO trasnferDTO){
+        return productService.transfer(trasnferDTO);
+    }
 
 }

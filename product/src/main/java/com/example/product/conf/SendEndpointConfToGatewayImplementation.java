@@ -30,6 +30,7 @@ public class SendEndpointConfToGatewayImplementation implements SendEndpointConf
         endpoints.add(new Endpoint("/api/products/{rfid}/location",HttpMethod.GET,UserType.USER));
         endpoints.add(new Endpoint("/api/products/categories",HttpMethod.POST,UserType.USER));
         endpoints.add(new Endpoint("/api/products/categories",HttpMethod.GET,UserType.USER));
+        endpoints.add(new Endpoint("/api/products/transfer",HttpMethod.GET,UserType.SUPERVISOR));
     }
 
     @Override
