@@ -1,5 +1,6 @@
 package com.example.product.entity;
 
+import com.example.contractorservice.entity.Contractor;
 import com.example.warehouse.entity.Spot;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -57,8 +58,14 @@ public class Product {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Spot spot;
 
-    @Column(name = "contractor_id")
-    private long contractor;
+    @ManyToOne(optional = false)
+    @JoinColumn(
+            name="contractor_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name="fk_product_contractor")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Contractor contractor;
 
     @ManyToOne(optional = false)
     @JoinColumn(

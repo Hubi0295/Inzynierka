@@ -41,6 +41,9 @@ CREATE TABLE products (
     CONSTRAINT fk_product_user
         FOREIGN KEY (user_id)
             REFERENCES Users (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_product_contractor
+        FOREIGN KEY (contractor_id)
+            REFERENCES contractors (id)
             ON DELETE CASCADE
-
 );

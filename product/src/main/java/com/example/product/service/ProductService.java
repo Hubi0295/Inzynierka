@@ -3,6 +3,8 @@ import com.example.auth.entity.Response;
 import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.services.JwtService;
+import com.example.contractorservice.entity.Contractor;
+import com.example.contractorservice.repository.ContractorRepository;
 import com.example.product.entity.*;
 import com.example.product.repository.CategoryRepository;
 import com.example.product.repository.ProductDetailsRepository;
@@ -32,6 +34,7 @@ public class ProductService {
     private final ProductDetailsRepository productDetailsRepository;
     private final SpotRepository spotRepository;
     private final UserRepository userRepository;
+    private final ContractorRepository contractorRepository;
     private final JwtService jwtService;
 
     public ResponseEntity<?> addProduct(ProductDTO productDTO, HttpServletRequest httpServletRequest){
@@ -47,14 +50,20 @@ public class ProductService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
         Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
-        if(spot!=null){
+        if(spot!=null && spot.is_free()){
             product.setSpot(spot);
             spotRepository.changeState(false,spot.getId());
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
         }
-        product.setContractor(1);
+        Contractor contractor = contractorRepository.findById((long) productDTO.getContractor()).orElse(null);
+        if(contractor!=null){
+            product.setContractor(contractor);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawny kontrahent"));
+        }
 
         List<Cookie> cookies = Arrays.stream(httpServletRequest.getCookies()).toList();
         for(Cookie cookie: cookies){
@@ -96,7 +105,7 @@ public class ProductService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
         }
         Spot spot = spotRepository.findSpotById(productDTO.getSpot()).orElse(null);
-        if(spot!=null){
+        if(spot!=null && spot.is_free()){
             if(spot.getId()!=product.getSpot().getId()){
                 spotRepository.changeState(true, product.getSpot().getId());
                 spotRepository.changeState(false,spot.getId());
@@ -106,7 +115,13 @@ public class ProductService {
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
         }
-        product.setContractor(1);
+        Contractor contractor = contractorRepository.findById((long) productDTO.getContractor()).orElse(null);
+        if(contractor!=null){
+            product.setContractor(contractor);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawny kontrahent"));
+        }
 
         List<Cookie> cookies = Arrays.stream(httpServletRequest.getCookies()).toList();
         for(Cookie cookie: cookies){
@@ -151,7 +166,7 @@ public class ProductService {
                         e.getName(),
                         e.getCategory(),
                         e.getSpot(),
-                        e.getContractor()
+                        e.getContractor().getAccount_manager().getUsername()
                 ));
         if(productPage.hasContent()){
             return ResponseEntity.ok().body(productPage);

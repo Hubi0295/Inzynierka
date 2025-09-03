@@ -1,5 +1,6 @@
 package com.example.product.entity;
 
+import com.example.contractorservice.entity.Contractor;
 import com.example.warehouse.entity.Spot;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +17,5 @@ public class ProductInfoDTO {
     private String name;
     private Category category;
     private Spot spot;
-    private long contractor;
+    private String contractor;
 }

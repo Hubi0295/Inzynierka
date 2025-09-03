@@ -11,12 +11,14 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EntityScan(basePackages = {
+        "com.example.contractorservice.entity",
         "com.example.product.entity",
         "com.example.auth.entity",
         "com.example.warehouse.entity"
 })
 @EnableJpaRepositories(basePackages = {
         "com.example.product.repository",
+        "com.example.contractorservice.repository",
         "com.example.warehouse.repository",
         "com.example.auth.repository"
 })
