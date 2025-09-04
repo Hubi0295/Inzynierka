@@ -26,7 +26,9 @@ public class confSec {
                         "/api/products/{uuid}",
                         "/api/products/{rfid}/location",
                         "/api/products/categories",
-                        "/api/products/transfer"
+                        "/api/products/transfer",
+                        "/api/products/inventories/{uuid}",
+                        "/api/products/inventories/{uuid}"
                 )
                 .permitAll()
                 .and()

@@ -1,21 +1,24 @@
 package com.example.warehouse.service;
-
-
 import com.example.warehouse.entity.*;
 import com.example.warehouse.repository.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.entity.Response;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.io.ByteArrayOutputStream;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,6 @@ public class WarehouseService {
     private final ShelfRepository shelfRepository;
     private final SpotRepository spotRepository;
     private final WarehouseRepository warehouseRepository;
-
     public ResponseEntity<?> addWarehouse(HttpServletRequest httpRequest, StructureDTO structureDTO) {
         String name = structureDTO.getName();
         Warehouse warehouse = new Warehouse();
@@ -206,5 +208,55 @@ public class WarehouseService {
                     .body(new Response("Nie znaleziono magazynu o podanym UUID"));
         }
     }
+    public ResponseEntity<?> getReportStateOfWarehouses(HttpServletRequest httpServletRequest) {
+        Workbook workbook = new XSSFWorkbook();
+        String time = new Timestamp(System.currentTimeMillis()).toString().replace(":","");
+        Sheet sheet = workbook.createSheet("Stan magazynu "+time);
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Warehouse ID");
+        header.createCell(1).setCellValue("Warehouse UUID");
+        header.createCell(2).setCellValue("Warehouse Name");
+        header.createCell(3).setCellValue("Hall ID");
+        header.createCell(4).setCellValue("Hall UUID");
+        header.createCell(5).setCellValue("Hall Name");
+        header.createCell(6).setCellValue("Shelf ID");
+        header.createCell(7).setCellValue("Shelf UUID");
+        header.createCell(8).setCellValue("Shelf Name");
+        header.createCell(9).setCellValue("Spot ID");
+        header.createCell(10).setCellValue("Spot UUID");
+        header.createCell(11).setCellValue("Spot Name");
+        header.createCell(12).setCellValue("Is Free");
+        AtomicInteger counter = new AtomicInteger(0);
+        spotRepository.selectStateOfWarehouse().stream().forEach(
+                e->{
+                    Row row = sheet.createRow(counter.incrementAndGet());
+                    row.createCell(0).setCellValue(e.getWarehouse_id());
+                    row.createCell(1).setCellValue(e.getWarehouse_uuid().toString());
+                    row.createCell(2).setCellValue(e.getWarehouse_name());
+                    row.createCell(3).setCellValue(e.getHall_id());
+                    row.createCell(4).setCellValue(e.getHall_uuid().toString());
+                    row.createCell(5).setCellValue(e.getHall_name());
+                    row.createCell(6).setCellValue(e.getShelf_id());
+                    row.createCell(7).setCellValue(e.getShelf_uuid().toString());
+                    row.createCell(8).setCellValue(e.getShelf_name());
+                    row.createCell(9).setCellValue(e.getSpot_id());
+                    row.createCell(10).setCellValue(e.getSpot_uuid().toString());
+                    row.createCell(11).setCellValue(e.getSpot_name());
+                    row.createCell(12).setCellValue(e.getIs_free());
+                }
+        );
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
+        try{
+            workbook.write(outputStream);
+            workbook.close();
+        }
+        catch (Exception e){
+            System.out.println("TTT");
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=stanMagazynu.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(outputStream.toByteArray());
+    }
 }

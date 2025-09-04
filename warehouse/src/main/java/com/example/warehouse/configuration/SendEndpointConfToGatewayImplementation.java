@@ -37,6 +37,8 @@ public class SendEndpointConfToGatewayImplementation implements SendEndpointConf
         endpoints.add(new Endpoint("/api/warehouseManagement/shelves/{uuid}/spots", HttpMethod.POST, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/spots/{uuid}", HttpMethod.PATCH, UserType.SUPERVISOR));
         endpoints.add(new Endpoint("/api/warehouseManagement/spots/{uuid}", HttpMethod.DELETE, UserType.SUPERVISOR));
+
+        endpoints.add(new Endpoint("/api/warehouseManagement/warehouses/report", HttpMethod.GET, UserType.SUPERVISOR));
     }
 
     @Override

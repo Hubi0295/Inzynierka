@@ -1,5 +1,7 @@
 package com.example.warehouse.repository;
 
+import com.example.warehouse.entity.ReportDTO;
+import com.example.warehouse.entity.Shelf;
 import com.example.warehouse.entity.Spot;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,10 +25,27 @@ public interface SpotRepository extends JpaRepository<Spot,Long> {
                     "WHERE W.uuid = :uuid"
     )
     Optional<List<Spot>> findByWarehouse(@Param("uuid") UUID uuid);
+    List<Spot> findAllByShelf(Shelf shelf);
+
 
     @Transactional
     @Modifying
     @Query(nativeQuery = true,
             value = "UPDATE spots SET is_free = :state WHERE id = :id")
     void changeState(@Param("state") boolean state, @Param("id") long id);
+
+    @Query("""
+    SELECT new com.example.warehouse.entity.ReportDTO(
+        w.id, w.uuid, w.name,
+        h.id, h.uuid, h.name,
+        sh.id, sh.uuid, sh.name,
+        s.id, s.uuid, s.name,
+        s.is_free
+    )
+    FROM Spot s
+    JOIN s.shelf sh
+    JOIN sh.hall h
+    JOIN h.warehouse w
+    """)
+    List<ReportDTO> selectStateOfWarehouse();
 }

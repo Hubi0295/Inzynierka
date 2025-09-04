@@ -1,10 +1,7 @@
 package com.example.product.fasada;
 
-import com.example.product.entity.CategoryDTO;
-import com.example.product.entity.ProductCreateDTO;
-import com.example.product.entity.ProductEditDTO;
+import com.example.product.entity.*;
 import com.example.product.service.ProductService;
-import com.example.product.entity.TrasnferDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,8 +51,16 @@ public class ProductController {
     }
 
     @RequestMapping(path="/transfer", method = RequestMethod.POST)
-    public ResponseEntity<?> transfer(@RequestBody @Valid TrasnferDTO trasnferDTO){
-        return productService.transfer(trasnferDTO);
+    public ResponseEntity<?> transfer(HttpServletRequest httpServletRequest,@RequestBody @Valid TrasnferDTO trasnferDTO){
+        return productService.transfer(httpServletRequest,trasnferDTO);
+    }
+    @RequestMapping(path="/inventories/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> getProductsOnShelves(@PathVariable("uuid") UUID uuid){
+        return productService.getProductsOnShelves(uuid);
+    }
+    @RequestMapping(path="/inventories/{uuid}", method = RequestMethod.POST)
+    public ResponseEntity<?> inventory(HttpServletRequest httpServletRequest,@PathVariable("uuid") UUID uuid, @Valid @RequestBody InventoryData inventoryData){
+        return productService.inventory(httpServletRequest,uuid, inventoryData);
     }
 
 }

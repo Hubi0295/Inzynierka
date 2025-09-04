@@ -33,7 +33,8 @@ public class confSec {
                         "/api/warehouseManagement/shelves/{uuid}",
                         "/api/warehouseManagement/shelves/{uuid}/spots",
                         "/api/warehouseManagement/spots/{uuid}",
-                        "/api/warehouseManagement/spots/{uuid}"
+                        "/api/warehouseManagement/spots/{uuid}",
+                        "/api/warehouseManagement/warehouses/report"
                 )
                 .permitAll()
                 .and()

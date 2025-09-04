@@ -72,5 +72,9 @@ public class WarehouseController {
     public ResponseEntity<?> deleteSpot(HttpServletRequest httpRequest, @PathVariable("uuid") UUID uuid){
         return warehouseService.deleteSpot(httpRequest, uuid);
     }
+    @RequestMapping(value = "/warehouses/report", method = RequestMethod.GET)
+    public ResponseEntity<?> getReportStateOfWarehouses(HttpServletRequest httpServletRequest){
+        return warehouseService.getReportStateOfWarehouses(httpServletRequest);
+    }
 
 }

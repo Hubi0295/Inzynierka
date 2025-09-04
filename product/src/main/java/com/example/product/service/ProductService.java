@@ -6,25 +6,33 @@ import com.example.auth.services.JwtService;
 import com.example.contractorservice.entity.Contractor;
 import com.example.contractorservice.repository.ContractorRepository;
 import com.example.product.entity.*;
-import com.example.product.repository.CategoryRepository;
-import com.example.product.repository.ProductDetailsRepository;
-import com.example.product.repository.ProductRepository;
+import com.example.product.repository.*;
+import com.example.warehouse.entity.Hall;
+import com.example.warehouse.entity.Shelf;
 import com.example.warehouse.entity.Spot;
+import com.example.warehouse.repository.HallRepository;
+import com.example.warehouse.repository.ShelfRepository;
 import com.example.warehouse.repository.SpotRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +44,11 @@ public class ProductService {
     private final UserRepository userRepository;
     private final ContractorRepository contractorRepository;
     private final JwtService jwtService;
-
+    private final HallRepository hallRepository;
+    private final ShelfRepository shelfRepository;
+    private final InventoryRepository inventoryRepository;
+    private final TransferRepository transferRepository;
+    @Transactional
     public ResponseEntity<?> addProduct(ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
         Product product = new Product();
         System.out.println(productCreateDTO.getRfid());
@@ -89,7 +101,7 @@ public class ProductService {
         productRepository.saveAndFlush(product);
         return ResponseEntity.ok(new Response("Pomyślnie dodano produkt"));
     }
-
+    @Transactional
     public ResponseEntity<?> editProduct(ProductEditDTO productEditDTO, UUID uuid, HttpServletRequest httpServletRequest) {
         Product product = productRepository.findByUuid(uuid).orElse(null);
         if(product==null){
@@ -158,7 +170,8 @@ public class ProductService {
                         e.getName(),
                         e.getCategory(),
                         e.getSpot(),
-                        e.getContractor().getAccount_manager().getUsername()
+                        e.getContractor().getAccount_manager().getUsername(),
+                        e.getUpdated_at()
                 ));
         if(productPage.hasContent()){
             return ResponseEntity.ok().body(productPage);
@@ -204,18 +217,36 @@ public class ProductService {
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok(categories);
     }
-
-    public ResponseEntity<?> transfer(TrasnferDTO trasnferDTO) {
+    @Transactional
+    public ResponseEntity<?> transfer(HttpServletRequest httpServletRequest,TrasnferDTO trasnferDTO) {
         Product product = productRepository.findByRfid(trasnferDTO.getRFID()).orElse(null);
         if(product!=null){
             Spot spot = spotRepository.findSpotById(trasnferDTO.getSpot()).orElse(null);
             if(spot!=null && spot.is_free()){
+                User user = userRepository.findUserByUsername(
+                        jwtService.getSubject(
+                                Arrays.stream(httpServletRequest.getCookies()).filter(
+                                    e->e.getName().equals("Authorization")
+                                ).toList()
+                                        .get(0)
+                                        .getValue()
+                        )
+                ).orElse(null);
+
+                Transfer transfer = new Transfer();
+                transfer.setDate(new Timestamp(System.currentTimeMillis()));
+                transfer.setProduct(product);
+                transfer.setUser(user);
+                transfer.setSpot_from(product.getSpot());
+                transfer.setSpot_to(spot);
+                transferRepository.saveAndFlush(transfer);
+
                 spotRepository.changeState(true,product.getSpot().getId());
                 product.setSpot(spot);
                 productRepository.saveAndFlush(product);
                 spotRepository.changeState(false,spot.getId());
-                return ResponseEntity.ok(new Response("Dokonano przesuniecia magazynowego produktu"));
 
+                return ResponseEntity.ok(new Response("Dokonano przesuniecia magazynowego produktu"));
             }
             else{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna lokalizacja"));
@@ -224,5 +255,104 @@ public class ProductService {
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne RFID produktu"));
         }
+    }
+    public ResponseEntity<?> getProductsOnShelves(UUID uuid) {
+        Hall hall = hallRepository.findHallByUuid(uuid).orElse(null);
+        InventoryData inventoryDataSend = new InventoryData();
+        if(hall!=null){
+            List<Shelf> shelfs = shelfRepository.findAllByHall(hall);
+            if(shelfs.size()>0){
+                for(Shelf shelf: shelfs){
+                    List<Spot> spots = spotRepository.findAllByShelf(shelf).stream().filter(
+                            e->!e.is_free()
+                    ).toList();
+                    List<ProductInventoryDTO> products = new ArrayList<>();
+                    for(Spot spot: spots){
+                        Product product = productRepository.findBySpot(spot).orElse(null);
+                        if(product!=null){
+                            products.add(new ProductInventoryDTO(
+                                    product.getUuid(),
+                                    product.getRfid(),
+                                    product.getName(),
+                                    product.getCategory().getName(),
+                                    product.getSpot().getId(),
+                                    product.getContractor().getName(),
+                                    product.getUpdated_at(),
+                                    "",
+                                    true
+                            ));
+                        }
+                    }
+                    inventoryDataSend.getInventory().put(shelf.getName(),products);
+                }
+                return ResponseEntity.ok(inventoryDataSend);
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new org.example.entity.Response("Brak regalow w hali"));
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new org.example.entity.Response("Brak produktow w hali"));
+        }
+    }
+
+    public ResponseEntity<?> inventory(HttpServletRequest httpServletRequest,UUID uuid, InventoryData inventoryData) {
+        HashMap<String, List<ProductInventoryDTO>> inventory = inventoryData.getInventory();
+        Set<String> shelfnames = inventory.keySet();
+        Workbook workbook = new XSSFWorkbook();
+        String time = new Timestamp(System.currentTimeMillis()).toString().replace(":","");
+        Sheet sheet = workbook.createSheet("Inwentaryzacja "+time);
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("UUID");
+        header.createCell(1).setCellValue("RFID");
+        header.createCell(2).setCellValue("NAME");
+        header.createCell(3).setCellValue("CATEGORY");
+        header.createCell(4).setCellValue("SPOT");
+        header.createCell(5).setCellValue("CONTRACTOR");
+        header.createCell(6).setCellValue("UPDATED_AT");
+        header.createCell(7).setCellValue("NOTE");
+        header.createCell(8).setCellValue("IS_CORRECT");
+        int counter=1;
+        for(String s: shelfnames){
+            List<ProductInventoryDTO> listOfProducts = inventory.get(s);
+            for(ProductInventoryDTO p: listOfProducts){
+                Row row = sheet.createRow(counter);
+                row.createCell(0).setCellValue(p.getUuid().toString());
+                row.createCell(1).setCellValue(p.getRFID());
+                row.createCell(2).setCellValue(p.getName());
+                row.createCell(3).setCellValue(p.getCategory());
+                row.createCell(4).setCellValue(p.getSpot());
+                row.createCell(5).setCellValue(p.getContractor());
+                row.createCell(6).setCellValue(p.getUpdated_at().toString());
+                row.createCell(7).setCellValue(p.getNote());
+                row.createCell(8).setCellValue(p.getIsCorrect());
+                counter++;
+            }
+        }
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try{
+            workbook.write(outputStream);
+            workbook.close();
+        }
+        catch (Exception e){
+            System.out.println("TTT");
+        }
+
+        Hall hall = hallRepository.findHallByUuid(uuid).orElse(null);
+        Inventory inventoryEntity = new Inventory();
+        inventoryEntity.setDate(new Timestamp(System.currentTimeMillis()));
+        inventoryEntity.setHall(hall);
+        String username = jwtService.getSubject(Arrays.stream(httpServletRequest.getCookies()).filter(
+                e->e.getName().equals("Authorization")
+        ).toList().get(0).getValue());
+        User user = userRepository.findUserByUsername(username).orElse(null);
+        inventoryEntity.setSupervisor(user);
+        inventoryRepository.saveAndFlush(inventoryEntity);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=produkty.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(outputStream.toByteArray());
     }
 }
