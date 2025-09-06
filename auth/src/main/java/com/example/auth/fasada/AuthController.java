@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -72,8 +73,9 @@ public class AuthController {
     @RequestMapping(path="/users", method = RequestMethod.GET)
     public ResponseEntity<?> getUsersInfo( HttpServletRequest request,
                                            @RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "10") int size){
-        return userService.getUsersInfo(request,page,size);
+                                           @RequestParam(defaultValue = "10") int size,
+                                           @RequestParam Map<String,String> filters){
+        return userService.getUsersInfo(request,page,size, filters);
     }
     @RequestMapping(path="/users/{uuid}/role", method = RequestMethod.PATCH)
     public ResponseEntity<?> changeRole(HttpServletRequest request,@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){

@@ -23,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -161,9 +162,12 @@ public class ProductService {
         return ResponseEntity.ok(new Response("Usunięto produkt"));
     }
 
-    public ResponseEntity<?> showProducts(int page, int size) {
+    public ResponseEntity<?> showProducts(int page, int size, Map<String,String> filters) {
         Pageable pageable1 = PageRequest.of(page,size);
-        Page<ProductInfoDTO> productPage = productRepository.findAll(pageable1).map(
+        filters.remove("page");
+        filters.remove("size");
+        Specification<Product> specification = ProductSpecification.filterByParams(filters);
+        Page<ProductInfoDTO> productPage = productRepository.findAll(specification,pageable1).map(
                 e->new ProductInfoDTO(
                         e.getUuid(),
                         e.getRfid(),

@@ -22,7 +22,7 @@ public class confSec {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
-                        "/api/products/",
+                        "/api/products",
                         "/api/products/{uuid}",
                         "/api/products/{rfid}/location",
                         "/api/products/categories",

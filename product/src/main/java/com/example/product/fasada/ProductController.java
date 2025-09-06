@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -15,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    @RequestMapping(path = "/",method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> addProduct(@Valid @RequestBody ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
         return productService.addProduct(productCreateDTO, httpServletRequest);
     }
@@ -27,10 +28,11 @@ public class ProductController {
     public ResponseEntity<?> deleteProduct(@PathVariable("uuid") UUID uuid){
         return productService.deleteProduct(uuid);
     }
-    @RequestMapping(path="/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> showProducts(@RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "10") int size){
-        return productService.showProducts(page,size);
+                                          @RequestParam(defaultValue = "10") int size,
+                                          @RequestParam Map<String, String> filters){
+        return productService.showProducts(page,size, filters);
     }
 
     @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)

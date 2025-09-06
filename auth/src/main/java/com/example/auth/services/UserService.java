@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -242,7 +244,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> getUsersInfo(HttpServletRequest request, int page, int size) {
+    public ResponseEntity<?> getUsersInfo(HttpServletRequest request, int page, int size, Map<String,String> filters) {
         validate_JWT_Token(request);
         ResponseEntity<?> r = authorize(request, UserType.ADMIN);
         if (r.getStatusCode() != HttpStatus.OK) {
@@ -250,7 +252,10 @@ public class UserService {
                     .body(new Response("Nie uzyskano dostepu"));
         }
         Pageable pageable = PageRequest.of(page, size);
-        Page<UserInfoDTO> usersPage = userRepository.findAll(pageable)
+        filters.remove("page");
+        filters.remove("size");
+        Specification<User> specification = UserSpecification.filtersByParams(filters);
+        Page<UserInfoDTO> usersPage = userRepository.findAll(specification,pageable)
                 .map(e -> new UserInfoDTO(
                         e.getUuid(),
                         e.getName(),
