@@ -27,8 +27,10 @@ public class Product {
     private UUID uuid = UUID.randomUUID();
     private String rfid;
     private String name;
-    private long product_receipt_id;
-    private long product_issue_id;
+    @Column(name="product_receipt_id")
+    private long product_receipt;
+    @Column(name="product_issue_id")
+    private long product_issue;
     @ManyToOne(optional = false)
     @JoinColumn(
             name="category_id",
