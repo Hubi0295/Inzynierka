@@ -14,7 +14,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductIssueInfo {
+public class ProductIssueDetails{
+    private List<ProductInfoDTO> products;
     private UUID uuid;
     private String contractor;
     private Timestamp created_at;

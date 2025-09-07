@@ -31,6 +31,17 @@ public class ProductServiceController {
     public ResponseEntity<?> deleteReceipt(@PathVariable("uuid") UUID uuid){
         return productServiceService.deleteReceipt(uuid);
     }
+    @RequestMapping(path="/receipts", method = RequestMethod.GET)
+    public ResponseEntity<?> showAllReceipts(){
+        return productServiceService.showAllReceipts();
+    }
+    @RequestMapping(path="/receipts/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> showReceiptDetails(@PathVariable("uuid") UUID uuid){
+        return productServiceService.showReceiptDetails(uuid);
+    }
+
+
+
     @RequestMapping(path="/issues",method = RequestMethod.POST)
     public ResponseEntity<?> createProductIssue(@Valid @RequestBody ProductIssueDTO productissueDTO, HttpServletRequest httpServletRequest){
         return productServiceService.createProductIssue(productissueDTO,httpServletRequest);
@@ -43,5 +54,15 @@ public class ProductServiceController {
     public ResponseEntity<?> deleteIssue(@PathVariable("uuid") UUID uuid){
         return productServiceService.deleteIssue(uuid);
     }
+    @RequestMapping(path="/issues", method = RequestMethod.GET)
+    public ResponseEntity<?> showAllIssues(){
+        return productServiceService.showAllIssues();
+    }
+    @RequestMapping(path="/issues/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> showIssueDetails(@PathVariable("uuid") UUID uuid){
+        return productServiceService.showIssueDetails(uuid);
+    }
+
+
 
 }

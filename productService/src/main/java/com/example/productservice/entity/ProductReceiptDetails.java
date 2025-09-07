@@ -14,10 +14,11 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductIssueInfo {
+public class ProductReceiptDetails {
     private UUID uuid;
     private String contractor;
     private Timestamp created_at;
     private Timestamp updated_at;
     private String document_number;
+    private List<ProductInfoDTO> products;
 }

@@ -15,4 +15,8 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
     Optional<Product> findByUuid(UUID uuid);
     Optional<Product> findByRfid(String rfid);
     Optional<Product> findBySpot(Spot spot);
+    @Query("SELECT p FROM Product p WHERE p.product_receipt = :id")
+    List<Product> findByProduct_receipt_id(@Param("id") Long id);
+    @Query("SELECT p FROM Product p WHERE p.product_issue = :id")
+    List<Product> findByProduct_issue_id(@Param("id") Long id);
 }

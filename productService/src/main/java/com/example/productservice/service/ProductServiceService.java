@@ -7,11 +7,9 @@ import com.example.auth.services.JwtService;
 import com.example.contractorservice.entity.Contractor;
 import com.example.contractorservice.repository.ContractorRepository;
 import com.example.product.entity.Product;
+import com.example.product.entity.ProductInfoDTO;
 import com.example.product.repository.ProductRepository;
-import com.example.productservice.entity.ProductIssue;
-import com.example.productservice.entity.ProductIssueDTO;
-import com.example.productservice.entity.ProductReceipt;
-import com.example.productservice.entity.ProductReceiptDTO;
+import com.example.productservice.entity.*;
 import com.example.productservice.repository.ProductIssueRepository;
 import com.example.productservice.repository.ProductReceiptRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,9 +87,7 @@ public class ProductServiceService {
                     productReceipt.setDocument_number("EdytowanePrzyjecie " + time);
                     productReceipt.setUpdated_at(time);
                     productReceiptRepository.saveAndFlush(productReceipt);
-                    productRepository.findAll().stream().filter(
-                            e->e.getProduct_receipt()==productReceipt.getId()
-                    ).forEach(e->{
+                    productRepository.findByProduct_receipt_id(productReceipt.getId()).forEach(e->{
                         e.setProduct_receipt(0);
                         e.set_active(false);
                     });
@@ -122,10 +120,8 @@ public class ProductServiceService {
     public ResponseEntity<?> deleteReceipt(UUID uuid) {
         ProductReceipt productReceipt = productReceiptRepository.findByUuid(uuid).orElse(null);
         if(productReceipt!=null){
-            productRepository.findAll().stream().filter(
-                    e->e.getProduct_receipt()==productReceipt.getId()
-            ).forEach(e->{
-                e.setProduct_issue(0);
+            productRepository.findByProduct_receipt_id(productReceipt.getId()).forEach(e->{
+                e.setProduct_receipt(0);
                 e.set_active(false);
             });
             productReceiptRepository.delete(productReceipt);
@@ -135,6 +131,55 @@ public class ProductServiceService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany numer przyjecia"));
         }
     }
+    public ResponseEntity<?> showAllReceipts() {
+        List<ProductReceiptInfo>  productReceiptInfos = new ArrayList<>();
+        productReceiptRepository.findAll().forEach(
+                e->{
+                    productReceiptInfos.add(
+                            new ProductReceiptInfo(
+                                    e.getUuid(),
+                                    e.getContractor().getName(),
+                                    e.getCreated_at(),
+                                    e.getUpdated_at(),
+                                    e.getDocument_number()
+                            )
+                    );
+                }
+        );
+        return ResponseEntity.ok(productReceiptInfos);
+    }
+
+    public ResponseEntity<?> showReceiptDetails(UUID uuid) {
+        ProductReceiptDetails productReceiptDetails = new ProductReceiptDetails();
+        ProductReceipt productReceipt = productReceiptRepository.findByUuid(uuid).orElse(null);
+        if(productReceipt!=null){
+            productReceiptDetails.setUuid(productReceipt.getUuid());
+            productReceiptDetails.setContractor(productReceipt.getContractor().getName());
+            productReceiptDetails.setUpdated_at(productReceipt.getUpdated_at());
+            productReceiptDetails.setCreated_at(productReceipt.getCreated_at());
+            productReceiptDetails.setDocument_number(productReceipt.getDocument_number());
+            List<ProductInfoDTO> productsInfo = new ArrayList<>();
+            productRepository.findByProduct_receipt_id(productReceipt.getId()).forEach(
+                    e->productsInfo.add(new ProductInfoDTO(
+                            e.getUuid(),
+                            e.getRfid(),
+                            e.getName(),
+                            e.getCategory(),
+                            e.getSpot(),
+                            e.getContractor().getName(),
+                            e.getUpdated_at()
+                    ))
+            );
+            productReceiptDetails.setProducts(productsInfo);
+            return ResponseEntity.ok(productReceiptDetails);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne uuid"));
+        }
+    }
+
+
+
 
     @Transactional
     public ResponseEntity<?> createProductIssue(ProductIssueDTO productIssueDTO, HttpServletRequest httpServletRequest){
@@ -187,9 +232,7 @@ public class ProductServiceService {
                     productIssue.setDocument_number("EdytowanePrzyjecie " + time);
                     productIssue.setUpdated_at(time);
                     productIssueRepository.saveAndFlush(productIssue);
-                    productRepository.findAll().stream().filter(
-                            e->e.getProduct_issue()==productIssue.getId()
-                    ).forEach(e->{
+                    productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
                         e.setProduct_issue(0);
                         e.set_active(true);
                     });
@@ -221,9 +264,7 @@ public class ProductServiceService {
     public ResponseEntity<?> deleteIssue(UUID uuid) {
         ProductIssue productIssue = productIssueRepository.findByUuid(uuid).orElse(null);
         if(productIssue!=null){
-            productRepository.findAll().stream().filter(
-                    e->e.getProduct_issue()==productIssue.getId()
-            ).forEach(e->{
+            productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
                 e.setProduct_issue(0);
                 e.set_active(true);
             });
@@ -234,4 +275,52 @@ public class ProductServiceService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany numer przyjecia"));
         }
     }
+    public ResponseEntity<?> showAllIssues() {
+        List<ProductIssueInfo>  productIssuesInfo = new ArrayList<>();
+        productIssueRepository.findAll().forEach(
+                e->{
+                    productIssuesInfo.add(
+                            new ProductIssueInfo(
+                                    e.getUuid(),
+                                    e.getContractor().getName(),
+                                    e.getCreated_at(),
+                                    e.getUpdated_at(),
+                                    e.getDocument_number()
+                            )
+                    );
+                }
+        );
+        return ResponseEntity.ok(productIssuesInfo);
+    }
+
+    public ResponseEntity<?> showIssueDetails(UUID uuid) {
+        ProductIssueDetails productIssueDetails = new ProductIssueDetails();
+        ProductIssue productIssue = productIssueRepository.findByUuid(uuid).orElse(null);
+        if(productIssue!=null){
+            productIssueDetails.setUuid(productIssue.getUuid());
+            productIssueDetails.setContractor(productIssue.getContractor().getName());
+            productIssueDetails.setUpdated_at(productIssue.getUpdated_at());
+            productIssueDetails.setCreated_at(productIssue.getCreated_at());
+            productIssueDetails.setDocument_number(productIssue.getDocument_number());
+            List<ProductInfoDTO> productsInfo = new ArrayList<>();
+            productRepository.findByProduct_issue_id(productIssue.getId()).forEach(
+                    e->productsInfo.add(new ProductInfoDTO(
+                            e.getUuid(),
+                            e.getRfid(),
+                            e.getName(),
+                            e.getCategory(),
+                            e.getSpot(),
+                            e.getContractor().getName(),
+                            e.getUpdated_at()
+                    ))
+            );
+            productIssueDetails.setProducts(productsInfo);
+            return ResponseEntity.ok(productIssueDetails);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne uuid"));
+        }
+    }
+
+
 }
