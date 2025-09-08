@@ -64,5 +64,9 @@ public class ProductController {
     public ResponseEntity<?> inventory(HttpServletRequest httpServletRequest,@PathVariable("uuid") UUID uuid, @Valid @RequestBody InventoryData inventoryData){
         return productService.inventory(httpServletRequest,uuid, inventoryData);
     }
+    @RequestMapping(path="/history/{uuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> showHistory(@PathVariable("uuid") UUID uuid ){
+        return productService.showHistory(uuid);
+    }
 
 }

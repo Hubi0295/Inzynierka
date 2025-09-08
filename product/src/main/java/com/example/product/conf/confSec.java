@@ -28,7 +28,8 @@ public class confSec {
                         "/api/products/categories",
                         "/api/products/transfer",
                         "/api/products/inventories/{uuid}",
-                        "/api/products/inventories/{uuid}"
+                        "/api/products/inventories/{uuid}",
+                        "/api/products/history/{uuid}"
                 )
                 .permitAll()
                 .and()

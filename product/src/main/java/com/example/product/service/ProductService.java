@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +50,7 @@ public class ProductService {
     private final ShelfRepository shelfRepository;
     private final InventoryRepository inventoryRepository;
     private final TransferRepository transferRepository;
+    private final ProductHistoryRespository productHistoryRespository;
     @Transactional
     public ResponseEntity<?> addProduct(ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
         Product product = new Product();
@@ -100,6 +102,7 @@ public class ProductService {
         productDetailsRepository.saveAndFlush(productDetails);
         product.setProductDetails(productDetails);
         productRepository.saveAndFlush(product);
+        saveHistory(product,ActionType.CREATE,product.getUser());
         return ResponseEntity.ok(new Response("Pomyślnie dodano produkt"));
     }
     @Transactional
@@ -146,7 +149,7 @@ public class ProductService {
         productDetailsRepository.saveAndFlush(productDetails);
         product.setProductDetails(productDetails);
         productRepository.saveAndFlush(product);
-
+        saveHistory(product,ActionType.EDIT,product.getUser());
         return ResponseEntity.ok(new Response("Pomyślnie edytowano produkt"));
     }
 
@@ -159,6 +162,7 @@ public class ProductService {
         productRepository.delete(product);
         productDetailsRepository.delete(product.getProductDetails());
         spotRepository.changeState(true,product.getSpot().getId());
+        saveHistory(product,ActionType.DELETE,product.getUser());
         return ResponseEntity.ok(new Response("Usunięto produkt"));
     }
 
@@ -249,7 +253,7 @@ public class ProductService {
                 product.setSpot(spot);
                 productRepository.saveAndFlush(product);
                 spotRepository.changeState(false,spot.getId());
-
+                saveHistory(product,ActionType.TRANSFER,product.getUser());
                 return ResponseEntity.ok(new Response("Dokonano przesuniecia magazynowego produktu"));
             }
             else{
@@ -358,5 +362,43 @@ public class ProductService {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=produkty.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(outputStream.toByteArray());
+    }
+
+    public ResponseEntity<?> showHistory(UUID uuid) {
+        Product product = productRepository.findByUuid(uuid).orElse(null);
+        ProductHistoryDTO productHistoryDTO = new ProductHistoryDTO();
+        if(product!=null){
+            List<ProductHistoryInfo> productHistory = productHistoryRespository.findByProductId(product)
+                    .stream()
+                    .map(e -> new ProductHistoryInfo(
+                            e.getId(),
+                            new ProductInfoDTO(
+                                    e.getProduct().getUuid(),
+                                    e.getProduct().getRfid(),
+                                    e.getProduct().getName(),
+                                    e.getProduct().getCategory(),
+                                    e.getProduct().getSpot(),
+                                    e.getProduct().getContractor().getName(),
+                                    e.getProduct().getUpdated_at()
+                            ),
+                            e.getUser().getUsername(),
+                            e.getActionType(),
+                            e.getCreated_at()
+                    ))
+                    .collect(Collectors.toList());
+            productHistoryDTO.setProductHistory(productHistory);
+            return ResponseEntity.ok(productHistoryDTO);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Bledne UUID produktu"));
+        }
+    }
+    private void saveHistory(Product product, ActionType actionType, User user){
+        ProductHistory productHistory = new ProductHistory();
+        productHistory.setProduct(product);
+        productHistory.setActionType(actionType);
+        productHistory.setCreated_at(new Timestamp(System.currentTimeMillis()));
+        productHistory.setUser(user);
+        productHistoryRespository.saveAndFlush(productHistory);
     }
 }

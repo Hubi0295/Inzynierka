@@ -7,7 +7,8 @@ CREATE TABLE transfers(
     date TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT fk_transfer_product
         FOREIGN KEY (product_id)
-            REFERENCES products(id),
+            REFERENCES products(id)
+                ON DELETE CASCADE,
     CONSTRAINT fk_transfer_user
         FOREIGN KEY (supervisor_id)
             REFERENCES users(id),

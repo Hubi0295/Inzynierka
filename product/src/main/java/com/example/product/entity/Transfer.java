@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class Transfer {
             nullable = false,
             foreignKey = @ForeignKey(name="fk_transfer_product")
     )
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
     @ManyToOne(optional = false)
     @JoinColumn(
