@@ -10,6 +10,101 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  eureka:
+    image: eureka-service
+    container_name: eureka-service
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8761 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
 
+  gateway:
+    image: gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8080 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      eureka:
+        condition: service_healthy
+  auth:
+    image: auth-service
+    container_name: auth-service
+    ports:
+      - "9876:9876"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9876 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      gateway:
+        condition: service_healthy
+  warehouse:
+    image: warehouse-service
+    container_name: warehouse-service
+    ports:
+      - "9880:9880"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9880 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      auth:
+        condition: service_healthy
+  contractor:
+    image: contractor-service
+    container_name: contractor-service
+    ports:
+      - "9877:9877"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9877 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      warehouse:
+        condition: service_healthy
+  product:
+    image: product-service
+    container_name: product-service
+    ports:
+      - "9878:9878"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9878 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      contractor:
+        condition: service_healthy
+  product-service:
+    image: product-service-service
+    container_name: product-service-service
+    ports:
+      - "9879:9879"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9879 || exit 1" ]
+      interval: 5s
+      retries: 12
+      start_period: 10s
+      timeout: 2s
+    depends_on:
+      product:
+        condition: service_healthy
 volumes:
   pgdata:
