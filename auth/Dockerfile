@@ -1,7 +1,7 @@
 FROM amazoncorretto:17-alpine
 WORKDIR /app
 COPY target/auth-0.0.1-SNAPSHOT.jar app.jar
-RUN apk add --no-cache netcat-openbsd
+RUN apk add --no-cache netcat-openbsd curl
 ARG DB_USER=dev
 ARG DB_PASS=dev
 ARG DB_NAME=dev
