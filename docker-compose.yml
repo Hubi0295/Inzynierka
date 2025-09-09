@@ -1,6 +1,7 @@
 services:
   warehouse-db:
-    image: db-warehouse
+    image: hubi0295/warehouseapp:db-warehouse-v1
+    pull_policy: always
     container_name: warehouse
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -11,7 +12,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
   eureka:
-    image: eureka-service
+    image: hubi0295/warehouseapp:eureka-service-v1
+    pull_policy: always
     container_name: eureka-service
     ports:
       - "8761:8761"
@@ -23,7 +25,8 @@ services:
       timeout: 5s
 
   gateway:
-    image: gateway-service
+    image: hubi0295/warehouseapp:gateway-service-v1
+    pull_policy: always
     container_name: gateway-service
     ports:
       - "8080:8080"
@@ -37,7 +40,8 @@ services:
       eureka:
         condition: service_healthy
   auth:
-    image: auth-service
+    image: hubi0295/warehouseapp:auth-service-v1
+    pull_policy: always
     container_name: auth-service
     ports:
       - "9876:9876"
@@ -51,7 +55,8 @@ services:
       gateway:
         condition: service_healthy
   warehouse:
-    image: warehouse-service
+    image: hubi0295/warehouseapp:warehouse-service-v1
+    pull_policy: always
     container_name: warehouse-service
     ports:
       - "9880:9880"
@@ -65,7 +70,8 @@ services:
       auth:
         condition: service_healthy
   contractor:
-    image: contractor-service
+    image: hubi0295/warehouseapp:contractor-service-v1
+    pull_policy: always
     container_name: contractor-service
     ports:
       - "9877:9877"
@@ -79,7 +85,8 @@ services:
       warehouse:
         condition: service_healthy
   product:
-    image: product-service
+    image: hubi0295/warehouseapp:product-service-v1
+    pull_policy: always
     container_name: product-service
     ports:
       - "9878:9878"
@@ -93,7 +100,8 @@ services:
       contractor:
         condition: service_healthy
   product-service:
-    image: product-service-service
+    image: hubi0295/warehouseapp:product-service-service-v1
+    pull_policy: always
     container_name: product-service-service
     ports:
       - "9879:9879"
