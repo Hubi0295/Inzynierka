@@ -21,7 +21,8 @@ public class confSec {
                 .authorizeHttpRequests()
                 .requestMatchers(
                         "/api/contractors/",
-                        "/api/contractors/{uuid}"
+                        "/api/contractors/{uuid}",
+                        "/actuator/health"
                 )
                 .permitAll()
                 .and()

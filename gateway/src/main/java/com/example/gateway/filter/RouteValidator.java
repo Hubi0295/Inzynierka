@@ -20,6 +20,7 @@ public class RouteValidator {
 
     private final Set<Endpoint> openApiEndpoints = new HashSet<>(List.of(
             new Endpoint("/v3/api-docs/**", HttpMethod.GET, UserType.USER),
+            new Endpoint("/actuator/health", HttpMethod.GET, UserType.USER),
             new Endpoint("/swagger-ui/**", HttpMethod.GET, UserType.USER),
             new Endpoint("/swagger-ui.html", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/users", HttpMethod.POST, UserType.USER),
@@ -31,6 +32,7 @@ public class RouteValidator {
             new Endpoint("/api/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
     ));
+    private final Set<Endpoint> userEndpoints = new HashSet<>(List.of());
 
     private final Set<Endpoint> adminEndpoints = new HashSet<>(List.of(
             new Endpoint("/api/auth/users/{uuid}", HttpMethod.PUT, UserType.ADMIN),
@@ -47,7 +49,7 @@ public class RouteValidator {
             if (endpoint.getRole() == UserType.ADMIN) {
                 adminEndpoints.add(endpoint);
             } else if (endpoint.getRole() == UserType.USER) {
-                openApiEndpoints.add(endpoint);
+                userEndpoints.add(endpoint);
             } else if (endpoint.getRole() == UserType.SUPERVISOR) {
                 supervisorEndpoints.add(endpoint);
             }
@@ -68,6 +70,8 @@ public class RouteValidator {
 
     public final Predicate<ServerHttpRequest> isOpen =
             request -> openApiEndpoints.stream().anyMatch(endpoint -> matches(request, endpoint));
+    public final Predicate<ServerHttpRequest> isUser =
+            request -> userEndpoints.stream().anyMatch(endpoint -> matches(request, endpoint));
 
     public final Predicate<ServerHttpRequest> isSecure =
             request -> !isOpen.test(request);

@@ -1,6 +1,7 @@
 package com.example.product;
 
 import com.example.auth.services.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -31,8 +32,10 @@ public class ProductApplication {
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
     }
+    @Value("${jwt.niewzykle_wazny_secret_jwt}")
+    private String jwtSecret;
     @Bean
-    public JwtService jwtService(){
-        return new JwtService("f1d8b9f42649a9a758ead13908ddce7f59280d4047a707af06176b4441764f90");
+    public JwtService jwtService() {
+        return new JwtService(jwtSecret);
     }
 }

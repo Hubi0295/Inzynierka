@@ -1,118 +1,114 @@
 services:
   warehouse-db:
-    image: hubi0295/warehouseapp:db-warehouse-v1
-    pull_policy: always
-    container_name: warehouse
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_DB}
+    image: warehouse-db
+#    pull_policy: always
+#    container_name: warehouse
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-  eureka:
-    image: hubi0295/warehouseapp:eureka-service-v1
-    pull_policy: always
-    container_name: eureka-service
-    ports:
-      - "8761:8761"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 8761 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-
-  gateway:
-    image: hubi0295/warehouseapp:gateway-service-v1
-    pull_policy: always
-    container_name: gateway-service
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 8080 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      eureka:
-        condition: service_healthy
-  auth:
-    image: hubi0295/warehouseapp:auth-service-v1
-    pull_policy: always
-    container_name: auth-service
-    ports:
-      - "9876:9876"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9876 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      gateway:
-        condition: service_healthy
-  warehouse:
-    image: hubi0295/warehouseapp:warehouse-service-v1
-    pull_policy: always
-    container_name: warehouse-service
-    ports:
-      - "9880:9880"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9880 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      auth:
-        condition: service_healthy
-  contractor:
-    image: hubi0295/warehouseapp:contractor-service-v1
-    pull_policy: always
-    container_name: contractor-service
-    ports:
-      - "9877:9877"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9877 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      warehouse:
-        condition: service_healthy
-  product:
-    image: hubi0295/warehouseapp:product-service-v1
-    pull_policy: always
-    container_name: product-service
-    ports:
-      - "9878:9878"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9878 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      contractor:
-        condition: service_healthy
-  product-service:
-    image: hubi0295/warehouseapp:product-service-service-v1
-    pull_policy: always
-    container_name: product-service-service
-    ports:
-      - "9879:9879"
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9879 || exit 1" ]
-      interval: 10s
-      retries: 15
-      start_period: 20s
-      timeout: 5s
-    depends_on:
-      product:
-        condition: service_healthy
+#  eureka:
+#    image: hubi0295/warehouseapp:eureka-service-v1
+#    pull_policy: always
+#    container_name: eureka-service
+#    ports:
+#      - "8761:8761"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 8761 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#
+#  gateway:
+#    image: hubi0295/warehouseapp:gateway-service-v1
+#    pull_policy: always
+#    container_name: gateway-service
+#    ports:
+#      - "8080:8080"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 8080 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      eureka:
+#        condition: service_healthy
+#  auth:
+#    image: hubi0295/warehouseapp:auth-service-v1
+#    pull_policy: always
+#    container_name: auth-service
+#    ports:
+#      - "9876:9876"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9876 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      gateway:
+#        condition: service_healthy
+#  warehouse:
+#    image: hubi0295/warehouseapp:warehouse-service-v1
+#    pull_policy: always
+#    container_name: warehouse-service
+#    ports:
+#      - "9880:9880"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9880 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      auth:
+#        condition: service_healthy
+#  contractor:
+#    image: hubi0295/warehouseapp:contractor-service-v1
+#    pull_policy: always
+#    container_name: contractor-service
+#    ports:
+#      - "9877:9877"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9877 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      warehouse:
+#        condition: service_healthy
+#  product:
+#    image: hubi0295/warehouseapp:product-service-v1
+#    pull_policy: always
+#    container_name: product-service
+#    ports:
+#      - "9878:9878"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9878 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      contractor:
+#        condition: service_healthy
+#  product-service:
+#    image: hubi0295/warehouseapp:product-service-service-v1
+#    pull_policy: always
+#    container_name: product-service-service
+#    ports:
+#      - "9879:9879"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9879 || true" ]
+#      interval: 10s
+#      retries: 15
+#      start_period: 20s
+#      timeout: 5s
+#    depends_on:
+#      product:
+#        condition: service_healthy
 volumes:
   pgdata:

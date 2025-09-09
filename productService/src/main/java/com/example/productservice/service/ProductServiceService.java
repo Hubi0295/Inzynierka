@@ -72,6 +72,10 @@ public class ProductServiceService {
                         saveHistory(product,ActionType.RECEIPT,product.getUser());
                         products.add(new ProductInfoDTO(product.getUuid(),product.getRfid(),product.getName(),product.getCategory(),product.getSpot(),product.getContractor().getName(),product.getUpdated_at()));
                     }
+                    else{
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany produkt"));
+                    }
                 }
                 XWPFDocument document = getDocumentReceipt(productReceipt, products,user, ActionType.RECEIPT);
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -253,6 +257,10 @@ public class ProductServiceService {
                         product.set_active(false);
                         saveHistory(product,ActionType.ISSUE,product.getUser());
                         products.add(new ProductInfoDTO(product.getUuid(),product.getRfid(),product.getName(),product.getCategory(),product.getSpot(),product.getContractor().getName(),product.getUpdated_at()));
+                    }
+                    else{
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany produkt"));
                     }
                 }
                 XWPFDocument document = getDocumentIssue(productIssue, products,user, ActionType.ISSUE);

@@ -5,6 +5,7 @@ import com.netflix.discovery.EurekaClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -53,6 +54,14 @@ public class Carousel {
         });
     }
     public void initAuthCarousel() throws NullPointerException{
-        instances = eurekaClient.getApplication("AUTHS").getInstances();
+        try{
+            instances = eurekaClient.getApplication("AUTHS").getInstances();
+        }
+        catch (NullPointerException e){
+            instances = Collections.emptyList();
+        }
+        if (instances == null) {
+            instances = Collections.emptyList();
+        }
     }
 }

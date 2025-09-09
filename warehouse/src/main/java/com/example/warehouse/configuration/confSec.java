@@ -22,6 +22,7 @@ public class confSec {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
+                        "/actuator/health",
                         "/api/warehouseManagement/warehouses",
                         "/api/warehouseManagement/warehouses/{uuid}",
                         "/api/warehouseManagement/warehouses/{uuid}",

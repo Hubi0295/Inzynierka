@@ -32,7 +32,8 @@ public class UserConf {
                 .requestMatchers("/api/auth/users", "/api/auth/login","/api/auth/validate","/api/auth/logout","/api/auth/auto-login", "/api/auth/authorizeAdmin", "/api/auth/authorizeSupervisor","/api/auth/users/{uuid}","/api/auth/users/{uuid}/role",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/swagger-ui.html")
+                        "/swagger-ui.html",
+                        "/actuator/health")
                 .permitAll()
                 .and()
                 .build();
