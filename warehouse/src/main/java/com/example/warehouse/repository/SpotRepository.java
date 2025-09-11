@@ -16,6 +16,8 @@ import java.util.UUID;
 public interface SpotRepository extends JpaRepository<Spot,Long> {
     Optional<Spot> findSpotByUuid(UUID uuid);
     Optional<Spot> findSpotById(long id);
+    @Query("SELECT s FROM Spot s WHERE s.is_free = :free")
+    List<Spot> findAllByFree(@Param("free") Boolean free);
     @Query(
             nativeQuery = true,
             value = "SELECT SP.id,SP.uuid,SP.name, SP.id_shelf, SP.is_free FROM SPOTS SP " +

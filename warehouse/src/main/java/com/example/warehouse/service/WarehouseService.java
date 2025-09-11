@@ -175,12 +175,20 @@ public class WarehouseService {
 
     public ResponseEntity<?> stateOfWarehouses(HttpServletRequest httpRequest) {
         List<SpotDTO> locations = spotRepository.findAll().stream().map(
-                e->new SpotDTO.Builder()
-                        .id(e.getId())
-                        .shelf(e.getShelf().getId())
-                        .hall(e.getShelf().getHall().getId())
-                        .warehouse(e.getShelf().getHall().getWarehouse().getId())
-                        .build()
+                e->new SpotDTO(
+                        (e.getId())
+                        ,(e.getUuid())
+                        ,(e.getName())
+                        ,(e.getShelf().getId())
+                        ,(e.getShelf().getUuid())
+                        ,(e.getShelf().getName())
+                        ,(e.getShelf().getHall().getId())
+                        ,(e.getShelf().getHall().getUuid())
+                        ,(e.getShelf().getHall().getName())
+                        ,(e.getShelf().getHall().getWarehouse().getId())
+                        ,(e.getShelf().getHall().getWarehouse().getUuid())
+                        ,(e.getShelf().getHall().getWarehouse().getName())
+                        ,(e.is_free()))
         ).toList();
 
         return ResponseEntity.ok(locations);
@@ -192,16 +200,38 @@ public class WarehouseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Response("Nie znaleziono magazynu o podanym UUID"));
         }
-        List<SpotDTO> locations = spotRepository.findByWarehouse(uuid).orElse(null).stream().map(
-                e->new SpotDTO.Builder()
-                        .id(e.getId())
-                        .shelf(e.getShelf().getId())
-                        .hall(e.getShelf().getHall().getId())
-                        .warehouse(e.getShelf().getHall().getWarehouse().getId())
-                        .build()
+        StateOfWarehouse stateOfWarehouse = new StateOfWarehouse();
+        List<SpotDTO> locations = spotRepository.findAll().stream().map(
+                e->new SpotDTO(
+                        (e.getId())
+                        ,(e.getUuid())
+                        ,(e.getName())
+                        ,(e.getShelf().getId())
+                        ,(e.getShelf().getUuid())
+                        ,(e.getShelf().getName())
+                        ,(e.getShelf().getHall().getId())
+                        ,(e.getShelf().getHall().getUuid())
+                        ,(e.getShelf().getHall().getName())
+                        ,(e.getShelf().getHall().getWarehouse().getId())
+                        ,(e.getShelf().getHall().getWarehouse().getUuid())
+                        ,(e.getShelf().getHall().getWarehouse().getName())
+                        ,(e.is_free()))
         ).toList();
+        Map<Long, Long> mapaOgolem = new HashMap<>();
+        Map<Long, Long> mapaWolnych = new HashMap<>();
+
+        locations.forEach(e -> {
+            mapaOgolem.merge(e.getHall(), 1L, Long::sum);
+            if (e.is_free()) {
+                mapaWolnych.merge(e.getHall(), 1L, Long::sum);
+            }
+        });
+
+        stateOfWarehouse.setLocations(locations);
+        stateOfWarehouse.setNumberAll(mapaOgolem);
+        stateOfWarehouse.setNumberFree(mapaWolnych);
         if(locations!=null && locations.size()>0){
-            return ResponseEntity.ok(locations);
+            return ResponseEntity.ok(stateOfWarehouse);
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -258,5 +288,12 @@ public class WarehouseService {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=stanMagazynu.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(outputStream.toByteArray());
+    }
+
+    public ResponseEntity<?> getFreeSpots() {
+        List<FreeSpots> freeSpots = spotRepository.findAllByFree(true).stream().map(
+                e->new FreeSpots(e.getName()+" "+e.getShelf().getName()+" "+e.getShelf().getHall().getName(),e.getId())
+        ).toList();
+        return ResponseEntity.ok(freeSpots);
     }
 }

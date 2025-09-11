@@ -3,6 +3,7 @@ package com.example.auth.services;
 import com.example.auth.entity.*;
 import com.example.auth.exceptions.UserExistsWithEmail;
 import com.example.auth.exceptions.UserExistsWithUsername;
+import com.example.auth.repository.ReportRepository;
 import com.example.auth.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -22,7 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,7 @@ public class UserService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final CookieService cookieService;
+    private final ReportRepository reportRepository;
     @Value("${jwt.duration}")
     private int duration;
     @Value("${jwt.refreshDuration}")
@@ -184,8 +188,8 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(errorMessage));
         }
     }
-
-    public ResponseEntity<?> updateUser(HttpServletRequest request, UserRegisterDTO userRegisterDTO, String uuid) {
+@Transactional
+    public ResponseEntity<?> updateUser(HttpServletRequest request, UserEditDTO userEditDTO, String uuid) {
         try{
             validate_JWT_Token(request);
         }
@@ -196,16 +200,23 @@ public class UserService {
         if(r.getStatusCode()!=HttpStatus.OK){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie uzyskano dostepu"));
         }
-        int result = userRepository.updateUserByUuid(
-                userRegisterDTO.getEmail(),
-                userRegisterDTO.getUsername(),
-                passwordEncoder.encode(userRegisterDTO.getPassword()),
-                userRegisterDTO.getUserType(),
-                uuid);
-        System.out.println(result);
-        if(result==1){
-            return ResponseEntity.ok(new AuthResponse("Pomyślnie zaaktualizowano użytkownika",userRegisterDTO.getName(),userRegisterDTO.getSurname(),userRegisterDTO.getUsername(),userRegisterDTO.getUserType().toString(),userRegisterDTO.getEmail()));
-
+        User user = userRepository.findUserByUuid(uuid).orElse(null);
+        if(user!=null){
+            user.setEmail(userEditDTO.getEmail());
+            user.setName(userEditDTO.getName());
+            user.setSurname(userEditDTO.getSurname());
+            if(userEditDTO.getPassword() != null){
+                if(userEditDTO.getPassword().length() >=10 & userEditDTO.getPassword().length()<=50) {
+                    user.setPassword(passwordEncoder.encode(userEditDTO.getPassword()));
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano akutalizacji uzytkownika, haslo powinno miec od 10 do 50 znakow"));
+                }
+            }
+            user.setRole(userEditDTO.getUserType());
+            user.setEnable(userEditDTO.isEnable());
+            userRepository.saveAndFlush(user);
+            return ResponseEntity.ok(new AuthResponse("Pomyślnie zaaktualizowano użytkownika",userEditDTO.getName(),userEditDTO.getSurname(),userEditDTO.getUsername(),userEditDTO.getUserType().toString(),userEditDTO.getEmail()));
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie wykonano akutalizacji uzytkownika"));
@@ -291,4 +302,25 @@ public class UserService {
         }
     }
 
+    public ResponseEntity<?> addReport(HttpServletRequest request, ReportDTO reportDTO) {
+        Report report = new Report();
+        User user = userRepository.findUserByUsername(
+                jwtService.getSubject(Arrays.stream(request.getCookies()).filter(
+                e->e.getName().equals("Authorization")
+        ).findFirst().get().getValue())
+        ).get();
+        report.setUser(user);
+        report.setType(reportDTO.getType());
+        report.setCreated_at(new Timestamp(System.currentTimeMillis()));
+        report.setContent(reportDTO.getContent());
+        reportRepository.saveAndFlush(report);
+        return ResponseEntity.ok(new Response("Dodano zgłoszenie"));
+    }
+
+    public ResponseEntity<?> getReports() {
+        List<ReportInfo> reports = reportRepository.findAll().stream().map(
+                e->new ReportInfo(e.getId(),e.getUser().getId(),e.getUser().getUsername(),e.getType().toString(),e.getCreated_at(),e.getContent())
+        ).toList();
+        return ResponseEntity.ok(reports);
+    }
 }
