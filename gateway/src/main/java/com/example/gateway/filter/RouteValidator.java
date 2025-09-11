@@ -29,10 +29,10 @@ public class RouteValidator {
             new Endpoint("/api/auth/auto-login", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/authorizeAdmin", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
-            new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
+            new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER),
+            new Endpoint("/api/auth/reports", HttpMethod.POST, UserType.USER)
     ));
     private final Set<Endpoint> userEndpoints = new HashSet<>(List.of(
-            new Endpoint("/api/auth/reports", HttpMethod.POST, UserType.USER)
     ));
 
     private final Set<Endpoint> adminEndpoints = new HashSet<>(List.of(
