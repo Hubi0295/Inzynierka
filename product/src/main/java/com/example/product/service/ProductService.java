@@ -51,6 +51,7 @@ public class ProductService {
     private final InventoryRepository inventoryRepository;
     private final TransferRepository transferRepository;
     private final ProductHistoryRespository productHistoryRespository;
+    
     @Transactional
     public ResponseEntity<?> addProduct(ProductCreateDTO productCreateDTO, HttpServletRequest httpServletRequest){
         Product product = new Product();
