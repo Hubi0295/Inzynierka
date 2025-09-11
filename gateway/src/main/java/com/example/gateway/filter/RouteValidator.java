@@ -23,7 +23,6 @@ public class RouteValidator {
             new Endpoint("/actuator/health", HttpMethod.GET, UserType.USER),
             new Endpoint("/swagger-ui/**", HttpMethod.GET, UserType.USER),
             new Endpoint("/swagger-ui.html", HttpMethod.GET, UserType.USER),
-            new Endpoint("/api/auth/users", HttpMethod.POST, UserType.USER),
             new Endpoint("/api/auth/login", HttpMethod.POST, UserType.USER),
             new Endpoint("/api/auth/validate", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/auth/logout", HttpMethod.GET, UserType.USER),
@@ -32,14 +31,18 @@ public class RouteValidator {
             new Endpoint("/api/auth/authorizeSupervisor", HttpMethod.GET, UserType.USER),
             new Endpoint("/api/gateway", HttpMethod.POST, UserType.USER)
     ));
-    private final Set<Endpoint> userEndpoints = new HashSet<>(List.of());
+    private final Set<Endpoint> userEndpoints = new HashSet<>(List.of(
+            new Endpoint("/api/auth/reports", HttpMethod.POST, UserType.USER)
+    ));
 
     private final Set<Endpoint> adminEndpoints = new HashSet<>(List.of(
             new Endpoint("/api/auth/users/{uuid}", HttpMethod.PUT, UserType.ADMIN),
             new Endpoint("/api/auth/users/{uuid}", HttpMethod.DELETE, UserType.ADMIN),
             new Endpoint("/api/auth/users/{uuid}/role", HttpMethod.PATCH, UserType.ADMIN),
             new Endpoint("/api/auth/users/{uuid}", HttpMethod.GET, UserType.ADMIN),
-            new Endpoint("/api/auth/users", HttpMethod.GET, UserType.ADMIN)
+            new Endpoint("/api/auth/users", HttpMethod.GET, UserType.ADMIN),
+            new Endpoint("/api/auth/users", HttpMethod.POST, UserType.ADMIN),
+            new Endpoint("/api/auth/reports", HttpMethod.GET, UserType.ADMIN)
     ));
 
     private final Set<Endpoint> supervisorEndpoints = new HashSet<>();

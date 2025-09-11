@@ -76,5 +76,9 @@ public class WarehouseController {
     public ResponseEntity<?> getReportStateOfWarehouses(HttpServletRequest httpServletRequest){
         return warehouseService.getReportStateOfWarehouses(httpServletRequest);
     }
+    @RequestMapping(value = "/warehouses/freeSpots", method = RequestMethod.GET)
+    public ResponseEntity<?> getFreeSpots(){
+        return warehouseService.getFreeSpots();
+    }
 
 }

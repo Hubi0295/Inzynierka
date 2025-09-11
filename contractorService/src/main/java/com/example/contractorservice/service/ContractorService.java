@@ -55,6 +55,7 @@ public class ContractorService {
         List<ContractorInfo> contractors = contractorRepository.findAll().stream().map(
                 e->new ContractorInfo(
                         e.getId(),
+                        e.getUuid(),
                         e.getName(),
                         e.getPhone(),
                         e.getEmail(),

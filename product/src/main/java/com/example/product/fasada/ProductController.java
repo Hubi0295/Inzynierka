@@ -47,6 +47,14 @@ public class ProductController {
     public ResponseEntity<?> addCategory(@Valid @RequestBody CategoryDTO categoryDTO){
         return productService.addCategory(categoryDTO);
     }
+    @RequestMapping(value = "/categories/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<?> editCategory(@Valid @RequestBody CategoryDTO categoryDTO, @PathVariable("id") long id){
+        return productService.editCategory(categoryDTO,id);
+    }
+    @RequestMapping(value = "/categories/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") long id){
+        return productService.deleteCategory(id);
+    }
     @RequestMapping(value = "/categories", method = RequestMethod.GET)
     public ResponseEntity<?> getCategories(){
         return productService.getCategories();

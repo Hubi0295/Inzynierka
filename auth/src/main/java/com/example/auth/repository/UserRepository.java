@@ -20,10 +20,6 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
     Optional<User> findUserByEmail(String email);
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.role = :role")
     Optional<User> findUserByUsernameAndHasPremission(@Param("username") String username, @Param("role") UserType role);
-    @Modifying
-    @Transactional
-    @Query("UPDATE User U SET U.email=:email, U.username=:username, U.password=:password, U.role=:role WHERE U.uuid=:uuid")
-    int updateUserByUuid(@Param("email") String email, @Param("username") String username, @Param("password") String password, @Param("role") UserType userType, @Param("uuid") String uuid);
     @Transactional
     @Modifying
     @Query("DELETE FROM User u WHERE u.uuid=:uuid")

@@ -33,7 +33,8 @@ public class UserConf {
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
-                        "/actuator/health")
+                        "/actuator/health",
+                        "/api/auth/reports")
                 .permitAll()
                 .and()
                 .build();
