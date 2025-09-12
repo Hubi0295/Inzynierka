@@ -402,4 +402,27 @@ public class ProductService {
         productHistory.setUser(user);
         productHistoryRespository.saveAndFlush(productHistory);
     }
+
+    public ResponseEntity<?> editCategory(CategoryDTO categoryDTO, long id) {
+        Category category = categoryRepository.findById(id).orElse(null);
+        if(category!=null){
+            category.setName(categoryDTO.getName());
+            categoryRepository.saveAndFlush(category);
+            return ResponseEntity.ok(new Response("edytowano kategorie"));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Bledne id kategorii"));
+        }
+    }
+
+    public ResponseEntity<?> deleteCategory(long id) {
+        Category category = categoryRepository.findById(id).orElse(null);
+        if(category!=null){
+            categoryRepository.delete(category);
+            return ResponseEntity.ok(new Response("usunieto kategorie"));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Bledne id kategorii"));
+        }
+    }
 }

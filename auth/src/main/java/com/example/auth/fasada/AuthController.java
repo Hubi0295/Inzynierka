@@ -59,8 +59,8 @@ public class AuthController {
         return userService.authorize(request,UserType.SUPERVISOR);
     }
     @RequestMapping(path="/users/{uuid}", method = RequestMethod.PUT)
-    public ResponseEntity<?> updateUser(HttpServletRequest request,@Valid @RequestBody UserRegisterDTO userRegisterDTO, @PathVariable("uuid") String uuid){
-        return userService.updateUser(request,userRegisterDTO,uuid);
+    public ResponseEntity<?> updateUser(HttpServletRequest request,@Valid @RequestBody UserEditDTO userEditDto, @PathVariable("uuid") String uuid){
+        return userService.updateUser(request,userEditDto,uuid);
     }
     @RequestMapping(path="/users/{uuid}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(HttpServletRequest request,@PathVariable("uuid") String uuid){
@@ -81,5 +81,14 @@ public class AuthController {
     public ResponseEntity<?> changeRole(HttpServletRequest request,@PathVariable("uuid") String uuid, @RequestBody UserChangeRoleDTO userChangeRoleDTO){
         return userService.changeRole(request, uuid, userChangeRoleDTO.getUserType());
     }
+    @RequestMapping(path="/reports",method = RequestMethod.POST)
+    public ResponseEntity<?> addReport(HttpServletRequest request, @RequestBody ReportDTO reportDTO){
+        return userService.addReport(request,reportDTO);
+    }
+    @RequestMapping(path="/reports",method = RequestMethod.GET)
+    public ResponseEntity<?> getReports(){
+        return userService.getReports();
+    }
+
 
 }
