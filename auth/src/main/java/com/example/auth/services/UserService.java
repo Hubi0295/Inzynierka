@@ -313,17 +313,21 @@ public class UserService {
 
     public ResponseEntity<?> addReport(HttpServletRequest request, ReportDTO reportDTO) {
         Report report = new Report();
-        User user = userRepository.findUserByUsername(
-                jwtService.getSubject(Arrays.stream(request.getCookies()).filter(
-                e->e.getName().equals("Authorization")
-        ).findFirst().get().getValue())
-        ).get();
-        report.setUser(user);
-        report.setType(reportDTO.getType());
-        report.setCreated_at(new Timestamp(System.currentTimeMillis()));
-        report.setContent(reportDTO.getContent());
-        reportRepository.saveAndFlush(report);
-        return ResponseEntity.ok(new Response("Dodano zgłoszenie"));
+        User user = userRepository.findUserByUsername(reportDTO.getUsername()).orElse(null);
+        if(user!=null){
+            if(user.getEmail().equals(reportDTO.getEmail())){
+                report.setUser(user);
+                report.setType(reportDTO.getType());
+                report.setCreated_at(new Timestamp(System.currentTimeMillis()));
+                report.setContent(reportDTO.getContent());
+                reportRepository.saveAndFlush(report);
+                return ResponseEntity.ok(new Response("Dodano zgłoszenie"));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Niepoprane dane, nie dodano zgloszenia"));
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Niepoprane dane, nie dodano zgloszenia"));
     }
 
     public ResponseEntity<?> getReports() {
