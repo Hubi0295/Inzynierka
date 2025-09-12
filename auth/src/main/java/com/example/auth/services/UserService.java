@@ -92,6 +92,9 @@ public class UserService {
         User user = userRepository.findUserByUsername(userProvided.getUsername()).orElse(null);
         System.out.println("PRZED");
         if(user!=null){
+            if(!user.isEnabled()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie zalogowano, konto nieaktywne"));
+            }
             System.out.println("PO");
             Authentication authentication = null;
             try{
@@ -153,6 +156,9 @@ public class UserService {
             String login = jwtService.getSubject(refresh);
             User user = userRepository.findUserByUsername(login).orElse(null);
             if (user != null) {
+                if(!user.isEnabled()){
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie zalogowano, konto nieaktywne"));
+                }
                 Cookie cookie = cookieService.generateCookie("Authorization", generate_JWT_Token(login,duration), duration);
                 response.addCookie(cookie);
                 return ResponseEntity.ok(new AuthResponse(
@@ -183,6 +189,9 @@ public class UserService {
     }
     public ResponseEntity<?> validateAuthority(User user, String successMessage, String errorMessage){
         if (user != null) {
+            if(!user.isEnabled()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Nie zalogowano, konto nieaktywne"));
+            }
             return ResponseEntity.ok().body(new AuthResponse(successMessage,user.getName(),user.getSurname(),user.getUsername(),user.getRole().toString(),user.getEmail()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(errorMessage));
