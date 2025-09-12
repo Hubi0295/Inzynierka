@@ -129,10 +129,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-<<<<<<< HEAD
-
-
-=======
     <build>
         <plugins>
             <plugin>
@@ -153,7 +149,6 @@
             </plugin>
         </plugins>
     </build>
->>>>>>> lokalnie
 <!--    <build>-->
 <!--        <plugins>-->
 <!--            <plugin>-->
