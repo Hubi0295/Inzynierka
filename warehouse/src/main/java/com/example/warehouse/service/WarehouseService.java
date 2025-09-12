@@ -32,7 +32,7 @@ public class WarehouseService {
         Warehouse warehouse = new Warehouse();
         warehouse.setName(name);
         warehouseRepository.saveAndFlush(warehouse);
-        return ResponseEntity.ok().body(new Response("Utworzono magazyn"+name));
+        return ResponseEntity.ok().body(new WarehouseResponse("Utworzono magazyn "+name,warehouse.getUuid()));
     }
 
     public ResponseEntity<?> addHall(HttpServletRequest httpRequest, StructureDTO structureDTO, UUID uuid) {
@@ -43,7 +43,7 @@ public class WarehouseService {
             hall.setName(name);
             hall.setWarehouse(warehouse);
             hallRepository.saveAndFlush(hall);
-            return ResponseEntity.ok().body(new Response("Utworzono hale "+name));
+            return ResponseEntity.ok().body(new WarehouseResponse("Utworzono hale "+name, hall.getUuid()));
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie udało się utworzyć hali o nazwie "+name));
@@ -58,7 +58,7 @@ public class WarehouseService {
             shelf.setName(name);
             shelf.setHall(hall);
             shelfRepository.saveAndFlush(shelf);
-            return ResponseEntity.ok().body(new Response("Utworzono regał"));
+            return ResponseEntity.ok().body(new WarehouseResponse("Utworzono regał", shelf.getUuid()));
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie udało się utworzyć regału o nazwie "+name));
@@ -74,7 +74,7 @@ public class WarehouseService {
             spot.setShelf(shelf);
             spot.set_free(true);
             spotRepository.saveAndFlush(spot);
-            return ResponseEntity.ok().body(new Response("Utworzono miejsce magazynowe"));
+            return ResponseEntity.ok().body(new WarehouseResponse("Utworzono miejsce magazynowe", spot.getUuid()));
         }
         else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie udało się utworzyć miejsca magazynowego o nazwie "+name));
