@@ -39,7 +39,7 @@ services:
       eureka:
         condition: service_healthy
   auth:
-    image: hubi0295/warehouseapp:auth-service-v3
+    image: hubi0295/warehouseapp:auth-service-v4
     pull_policy: always
     container_name: auth-service
     ports:
@@ -54,7 +54,7 @@ services:
       gateway:
         condition: service_healthy
   warehouse:
-    image: hubi0295/warehouseapp:warehouse-service-v3
+    image: hubi0295/warehouseapp:warehouse-service-v4
     pull_policy: always
     container_name: warehouse-service
     ports:
