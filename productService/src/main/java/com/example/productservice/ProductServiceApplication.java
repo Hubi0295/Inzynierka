@@ -22,7 +22,8 @@ import org.springframework.web.client.RestTemplate;
         "com.example.productservice.repository",
         "com.example.auth.repository",
         "com.example.product.repository",
-        "com.example.contractorservice.repository"
+        "com.example.contractorservice.repository",
+        "com.example.warehouse.repository"
 })
 public class ProductServiceApplication {
 

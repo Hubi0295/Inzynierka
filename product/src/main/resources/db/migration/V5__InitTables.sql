@@ -4,6 +4,7 @@ CREATE TABLE inventories(
     date TIMESTAMPTZ NOT NULL DEFAULT now(),
     supervisor_id INT NOT NULL,
     hall_id INT NOT NULL,
+    note VARCHAR(200),
     CONSTRAINT fk_inventory_user
         FOREIGN KEY (supervisor_id)
             REFERENCES users(id),

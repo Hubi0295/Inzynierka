@@ -38,4 +38,5 @@ public class Inventory {
             foreignKey = @ForeignKey(name="fk_inventory_hall")
     )
     private Hall hall;
+    private String note;
 }
