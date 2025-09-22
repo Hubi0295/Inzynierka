@@ -12,9 +12,11 @@ import com.example.product.entity.ProductHistory;
 import com.example.product.entity.ProductInfoDTO;
 import com.example.product.repository.ProductHistoryRespository;
 import com.example.product.repository.ProductRepository;
+import com.example.product.service.ProductService;
 import com.example.productservice.entity.*;
 import com.example.productservice.repository.ProductIssueRepository;
 import com.example.productservice.repository.ProductReceiptRepository;
+import com.example.warehouse.repository.SpotRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -43,7 +45,7 @@ public class ProductServiceService {
     private final ProductRepository productRepository;
     private final ContractorRepository contractorRepository;
     private final ProductHistoryRespository productHistoryRespository;
-
+    private final SpotRepository spotRepository;
     @Transactional
     public ResponseEntity<?> createProductReceipt(ProductReceiptDTO productReceiptDTO, HttpServletRequest httpServletRequest) {
         String username = jwtService.getSubject(Arrays.stream(httpServletRequest.getCookies()).filter(e->e.getName().equals("Authorization")).findFirst().get().getValue());
@@ -195,7 +197,12 @@ public class ProductServiceService {
                     );
                 }
         );
-        return ResponseEntity.ok(productReceiptInfos);
+        if(!productReceiptInfos.isEmpty()){
+            return ResponseEntity.ok(productReceiptInfos);
+        }
+        else{
+            return ResponseEntity.ok(new Response("Brak przyjec"));
+        }
     }
 
     public ResponseEntity<?> showReceiptDetails(UUID uuid) {
@@ -256,6 +263,8 @@ public class ProductServiceService {
                         product.setProduct_issue(productIssue.getId());
                         product.set_active(false);
                         saveHistory(product,ActionType.ISSUE,product.getUser());
+                        spotRepository.changeState(true,product.getSpot().getId());
+                        spotRepository.flush();
                         products.add(new ProductInfoDTO(product.getUuid(),product.getRfid(),product.getName(),product.getCategory(),product.getSpot(),product.getContractor().getName(),product.getUpdated_at()));
                     }
                     else{
@@ -305,6 +314,7 @@ public class ProductServiceService {
                     productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
                         e.setProduct_issue(0);
                         e.set_active(true);
+                        spotRepository.changeState(false,e.getSpot().getId());
                     });
                     List<ProductInfoDTO> products = new ArrayList<>();
                     for(UUID id: productIssueDTO.getProducts()){
@@ -313,6 +323,7 @@ public class ProductServiceService {
                             product.setProduct_issue(productIssue.getId());
                             product.set_active(false);
                             saveHistory(product,ActionType.ISSUE,product.getUser());
+                            spotRepository.changeState(true,product.getSpot().getId());
                             products.add(new ProductInfoDTO(product.getUuid(),product.getRfid(),product.getName(),product.getCategory(),product.getSpot(),product.getContractor().getName(),product.getUpdated_at()));
                         }
                         else{
@@ -354,6 +365,7 @@ public class ProductServiceService {
             productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
                 e.setProduct_issue(0);
                 e.set_active(true);
+                spotRepository.changeState(false,e.getSpot().getId());
             });
             productIssueRepository.delete(productIssue);
             return ResponseEntity.ok(new Response("Usunieto wydanie magazynowe"));
@@ -377,7 +389,12 @@ public class ProductServiceService {
                     );
                 }
         );
-        return ResponseEntity.ok(productIssuesInfo);
+        if(!productIssuesInfo.isEmpty()){
+            return ResponseEntity.ok(productIssuesInfo);
+        }
+        else{
+            return ResponseEntity.ok(new Response("Brak wydan"));
+        }
     }
 
     public ResponseEntity<?> showIssueDetails(UUID uuid) {

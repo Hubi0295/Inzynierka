@@ -10,4 +10,5 @@ import java.util.List;
 @Setter
 public class InventoryData {
     private HashMap<String, List<ProductInventoryDTO>> inventory = new HashMap<>();
+    private String note;
 }

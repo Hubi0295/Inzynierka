@@ -13,6 +13,7 @@ import com.example.warehouse.entity.Spot;
 import com.example.warehouse.repository.HallRepository;
 import com.example.warehouse.repository.ShelfRepository;
 import com.example.warehouse.repository.SpotRepository;
+import java.util.function.Predicate;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,29 +109,20 @@ public class ProductService {
         return ResponseEntity.ok(new Response("Pomyślnie dodano produkt"));
     }
     @Transactional
-    public ResponseEntity<?> editProduct(ProductEditDTO productEditDTO, UUID uuid, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> editProduct(ProductEditDTO productEditDTO, UUID uuid, HttpServletRequest request) {
         Product product = productRepository.findByUuid(uuid).orElse(null);
-        if(product==null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne UUID produktu"));
+        if (product == null) {
+            return ResponseEntity.badRequest().body(new Response("Niepoprawne UUID produktu"));
         }
-        product.setRfid(productEditDTO.getRfid());
-        product.setName(productEditDTO.getName());
-        Category category = categoryRepository.findById((long) productEditDTO.getCategory()).orElse(null);
-        if(category!=null){
-            product.setCategory(category);
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawna kategoria"));
-        }
-        Contractor contractor = contractorRepository.findById((long) productEditDTO.getContractor()).orElse(null);
-        if(contractor!=null){
-            product.setContractor(contractor);
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawny kontrahent"));
-        }
-
-        List<Cookie> cookies = Arrays.stream(httpServletRequest.getCookies()).toList();
+        updateField(productEditDTO.getRfid(), product::setRfid, s -> !s.isBlank());
+        updateField(productEditDTO.getName(), product::setName, s -> !s.isBlank());
+        Optional.ofNullable(productEditDTO.getCategory())
+                .flatMap(id -> categoryRepository.findById(id.longValue()))
+                .ifPresent(product::setCategory);
+        Optional.ofNullable(productEditDTO.getContractor())
+                .flatMap(id -> contractorRepository.findById(id.longValue()))
+                .ifPresent(product::setContractor);
+        List<Cookie> cookies = Arrays.stream(request.getCookies()).toList();
         for(Cookie cookie: cookies){
             if(cookie.getName().equals("Authorization")){
                 String username = jwtService.getSubject(cookie.getValue());
@@ -137,33 +130,43 @@ public class ProductService {
                 product.setUser(user);
             }
         }
-        product.setUpdated_at(new Timestamp(System.currentTimeMillis()));
 
-        ProductDetails productDetails = productDetailsRepository.findById(product.getProductDetails().getId()).orElse(null);
-        if(productDetails==null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne szegóły produktu"));
+        product.setUpdated_at(new Timestamp(System.currentTimeMillis()));
+        ProductDetails productDetails = productDetailsRepository.findById(product.getProductDetails().getId())
+                .orElse(null);
+        if (productDetails == null) {
+            return ResponseEntity.badRequest().body(new Response("Niepoprawne szczegóły produktu"));
         }
-        productDetails.setDescription(productEditDTO.getDescription());
-        productDetails.setWeight(productEditDTO.getWeight());
-        productDetails.setWidth(productEditDTO.getWidth());
-        productDetails.setHeight(productEditDTO.getHeight());
+
+        updateField(productEditDTO.getDescription(), productDetails::setDescription, s -> !s.isBlank());
+        updateField(productEditDTO.getWeight(), productDetails::setWeight, w -> w > 0);
+        updateField(productEditDTO.getWidth(), productDetails::setWidth, w -> w > 0);
+        updateField(productEditDTO.getHeight(), productDetails::setHeight, h -> h > 0);
+
         productDetailsRepository.saveAndFlush(productDetails);
         product.setProductDetails(productDetails);
         productRepository.saveAndFlush(product);
-        saveHistory(product,ActionType.EDIT,product.getUser());
+
+        saveHistory(product, ActionType.EDIT, product.getUser());
         return ResponseEntity.ok(new Response("Pomyślnie edytowano produkt"));
     }
 
+    private <T> void updateField(T newValue, Consumer<T> setter, Predicate<T> validator) {
+        if (newValue != null && validator.test(newValue)) {
+            setter.accept(newValue);
+        }
+    }
+
+    @Transactional
     public ResponseEntity<?> deleteProduct(UUID uuid) {
         Product product = productRepository.findByUuid(uuid).orElse(null);
 
         if(product==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawne UUID produktu"));
         }
+        spotRepository.changeState(true,product.getSpot().getId());
         productRepository.delete(product);
         productDetailsRepository.delete(product.getProductDetails());
-        spotRepository.changeState(true,product.getSpot().getId());
-        saveHistory(product,ActionType.DELETE,product.getUser());
         return ResponseEntity.ok(new Response("Usunięto produkt"));
     }
 
@@ -179,14 +182,14 @@ public class ProductService {
                         e.getName(),
                         e.getCategory(),
                         e.getSpot(),
-                        e.getContractor().getAccount_manager().getUsername(),
+                        e.getContractor().getName(),
                         e.getUpdated_at()
                 ));
         if(productPage.hasContent()){
             return ResponseEntity.ok().body(productPage);
         }
         else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie udało sie zwrócić produktow"));
+            return ResponseEntity.ok(new Response("Nie udało sie zwrócić produktow"));
         }
     }
 
@@ -278,7 +281,7 @@ public class ProductService {
                     List<ProductInventoryDTO> products = new ArrayList<>();
                     for(Spot spot: spots){
                         Product product = productRepository.findBySpot(spot).orElse(null);
-                        if(product!=null){
+                        if(product!=null && product.is_active()){
                             products.add(new ProductInventoryDTO(
                                     product.getUuid(),
                                     product.getRfid(),
@@ -294,6 +297,7 @@ public class ProductService {
                     }
                     inventoryDataSend.getInventory().put(shelf.getName(),products);
                 }
+                inventoryDataSend.setNote("");
                 return ResponseEntity.ok(inventoryDataSend);
             }
             else{
@@ -338,6 +342,9 @@ public class ProductService {
                 counter++;
             }
         }
+        Row row = sheet.createRow(counter);
+        row.createCell(0).setCellValue("Ogolne notatki:");
+        row.createCell(1).setCellValue(inventoryData.getNote());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try{
@@ -357,6 +364,7 @@ public class ProductService {
         ).toList().get(0).getValue());
         User user = userRepository.findUserByUsername(username).orElse(null);
         inventoryEntity.setSupervisor(user);
+        inventoryEntity.setNote(inventoryData.getNote());
         inventoryRepository.saveAndFlush(inventoryEntity);
 
         return ResponseEntity.ok()

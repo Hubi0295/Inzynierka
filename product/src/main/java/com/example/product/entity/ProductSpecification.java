@@ -33,7 +33,14 @@ public class ProductSpecification {
                                 predicates.add(criteriaBuilder.equal(root.get("product_receipt"), Integer.valueOf(value)));
                         case "product_issue" ->
                                 predicates.add(criteriaBuilder.equal(root.get("product_issue"), Integer.valueOf(value)));
-
+                        case "issued" -> {
+                            boolean issued = Boolean.parseBoolean(value);
+                            if (issued) {
+                                predicates.add(criteriaBuilder.notEqual(root.get("product_issue"), 0));
+                            } else {
+                                predicates.add(criteriaBuilder.equal(root.get("product_issue"), 0));
+                            }
+                        }
                         case "spot" -> predicates.add(criteriaBuilder.equal(root.get("spot"), Integer.valueOf(value)));
                         case "contractor" -> predicates.add(criteriaBuilder.equal(root.get("contractor"), Integer.valueOf(value)));
                         case "updated_at" -> predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("updated_at").as(String.class)), value.toLowerCase() + "%"));
