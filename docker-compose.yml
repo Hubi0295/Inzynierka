@@ -84,7 +84,7 @@ services:
       warehouse:
         condition: service_healthy
   product:
-    image: hubi0295/warehouseapp:product-service-v4
+    image: hubi0295/warehouseapp:product-service-v5
     pull_policy: always
     container_name: product-service
     ports:
@@ -99,7 +99,7 @@ services:
       contractor:
         condition: service_healthy
   product-service:
-    image: hubi0295/warehouseapp:product-service-service-v3
+    image: hubi0295/warehouseapp:product-service-service-v4
     pull_policy: always
     container_name: product-service-service
     ports:
