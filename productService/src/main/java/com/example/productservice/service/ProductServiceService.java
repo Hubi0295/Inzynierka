@@ -306,10 +306,12 @@ public class ProductServiceService {
                         .body(outputStream.toByteArray());
             }
             else{
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany kontrahent"));
             }
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawny uzytkownik"));
         }
     }
@@ -333,6 +335,7 @@ public class ProductServiceService {
                         Spot spot = spotRepository.findSpotById(p.getSpot().getId()).orElse(null);
                         if(spot!=null){
                             if(!spot.is_free()){
+                                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna wykonac akcji, miejsce magazynowe produktu jest zajęte"));
                             }
                         }
@@ -372,14 +375,17 @@ public class ProductServiceService {
                             .body(outputStream.toByteArray());
                 }
                 else{
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany kontrahent"));
                 }
             }
             else{
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany uzytkownik"));
             }
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zle podany uuid Przyjecia"));
         }
     }
@@ -392,6 +398,7 @@ public class ProductServiceService {
                 Spot spot = spotRepository.findSpotById(p.getSpot().getId()).orElse(null);
                 if(spot!=null){
                     if(!spot.is_free()){
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna wykonac akcji, miejsce magazynowe produktu jest zajęte"));
                     }
                 }
@@ -403,6 +410,7 @@ public class ProductServiceService {
             return ResponseEntity.ok(new Response("Usunieto wydanie magazynowe"));
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany numer przyjecia"));
         }
     }
