@@ -16,6 +16,7 @@ import com.example.product.service.ProductService;
 import com.example.productservice.entity.*;
 import com.example.productservice.repository.ProductIssueRepository;
 import com.example.productservice.repository.ProductReceiptRepository;
+import com.example.warehouse.entity.Spot;
 import com.example.warehouse.repository.SpotRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -96,10 +97,12 @@ public class ProductServiceService {
                         .body(outputStream.toByteArray());
             }
             else{
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany kontrahent"));
             }
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Niepoprawny uzytkownik"));
         }
     }
@@ -121,10 +124,15 @@ public class ProductServiceService {
                     productReceipt.setDocument_number("EdytowanePrzyjecie " + time);
                     productReceipt.setUpdated_at(time);
                     productReceiptRepository.saveAndFlush(productReceipt);
-                    productRepository.findByProduct_receipt_id(productReceipt.getId()).forEach(e->{
-                        e.setProduct_receipt(0);
-                        e.set_active(false);
-                    });
+                    List<Product> productsByReceipt = productRepository.findByProduct_receipt_id(productReceipt.getId());
+                    for(Product p : productsByReceipt){
+                        if(p.getProduct_issue() != 0){
+                            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna usunąć produktu z przyjecia jeśli jest już wydany"));
+                        }
+                        p.setProduct_receipt(0);
+                        p.set_active(false);
+                    }
                     List<ProductInfoDTO> products = new ArrayList<>();
                     for(UUID id: productReceiptDTO.getProducts()){
                         Product product = productRepository.findByUuid(id).orElse(null);
@@ -156,29 +164,38 @@ public class ProductServiceService {
                             .body(outputStream.toByteArray());
                 }
                 else{
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany kontrahent"));
                 }
             }
             else{
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany uzytkownik"));
             }
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zle podany uuid Przyjecia"));
         }
     }
-
+    @Transactional
     public ResponseEntity<?> deleteReceipt(UUID uuid) {
         ProductReceipt productReceipt = productReceiptRepository.findByUuid(uuid).orElse(null);
         if(productReceipt!=null){
-            productRepository.findByProduct_receipt_id(productReceipt.getId()).forEach(e->{
-                e.setProduct_receipt(0);
-                e.set_active(false);
-            });
+            List<Product> productsByReceipt = productRepository.findByProduct_receipt_id(productReceipt.getId());
+            for(Product p : productsByReceipt){
+                if(p.getProduct_issue() != 0){
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna usunąć przyjęcia z wydanym produktem"));
+                }
+                p.setProduct_receipt(0);
+                p.set_active(false);
+            }
             productReceiptRepository.delete(productReceipt);
             return ResponseEntity.ok(new Response("Usunięto przyjęcie magazynowe"));
         }
         else{
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zly podany numer przyjecia"));
         }
     }
@@ -311,11 +328,18 @@ public class ProductServiceService {
                     productIssue.setDocument_number("EdytowanePrzyjecie " + time);
                     productIssue.setUpdated_at(time);
                     productIssueRepository.saveAndFlush(productIssue);
-                    productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
-                        e.setProduct_issue(0);
-                        e.set_active(true);
-                        spotRepository.changeState(false,e.getSpot().getId());
-                    });
+                    List<Product> productByIssue = productRepository.findByProduct_issue_id(productIssue.getId());
+                    for(Product p: productByIssue){
+                        Spot spot = spotRepository.findSpotById(p.getSpot().getId()).orElse(null);
+                        if(spot!=null){
+                            if(!spot.is_free()){
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna wykonac akcji, miejsce magazynowe produktu jest zajęte"));
+                            }
+                        }
+                        p.set_active(true);
+                        p.setProduct_issue(0);
+                        spotRepository.changeState(false,p.getSpot().getId());
+                    }
                     List<ProductInfoDTO> products = new ArrayList<>();
                     for(UUID id: productIssueDTO.getProducts()){
                         Product product = productRepository.findByUuid(id).orElse(null);
@@ -359,14 +383,22 @@ public class ProductServiceService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Zle podany uuid Przyjecia"));
         }
     }
+    @Transactional
     public ResponseEntity<?> deleteIssue(UUID uuid) {
         ProductIssue productIssue = productIssueRepository.findByUuid(uuid).orElse(null);
         if(productIssue!=null){
-            productRepository.findByProduct_issue_id(productIssue.getId()).forEach(e->{
-                e.setProduct_issue(0);
-                e.set_active(true);
-                spotRepository.changeState(false,e.getSpot().getId());
-            });
+            List<Product> productByIssue = productRepository.findByProduct_issue_id(productIssue.getId());
+            for(Product p: productByIssue){
+                Spot spot = spotRepository.findSpotById(p.getSpot().getId()).orElse(null);
+                if(spot!=null){
+                    if(!spot.is_free()){
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Nie mozna wykonac akcji, miejsce magazynowe produktu jest zajęte"));
+                    }
+                }
+                p.set_active(true);
+                p.setProduct_issue(0);
+                spotRepository.changeState(false,p.getSpot().getId());
+            }
             productIssueRepository.delete(productIssue);
             return ResponseEntity.ok(new Response("Usunieto wydanie magazynowe"));
         }
