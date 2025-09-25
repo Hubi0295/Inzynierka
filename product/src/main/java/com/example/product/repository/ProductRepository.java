@@ -14,7 +14,8 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
     Optional<Product> findByUuid(UUID uuid);
     Optional<Product> findByRfid(String rfid);
-    Optional<Product> findBySpot(Spot spot);
+    @Query("SELECT p FROM Product p WHERE p.spot = :spot AND p.is_active=true")
+    Optional<Product> findBySpot(@Param("spot") Spot spot);
     @Query("SELECT p FROM Product p WHERE p.product_receipt = :id")
     List<Product> findByProduct_receipt_id(@Param("id") Long id);
     @Query("SELECT p FROM Product p WHERE p.product_issue = :id")

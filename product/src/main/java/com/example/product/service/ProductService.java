@@ -373,8 +373,8 @@ public class ProductService {
                 .body(outputStream.toByteArray());
     }
 
-    public ResponseEntity<?> showHistory(UUID uuid) {
-        Product product = productRepository.findByUuid(uuid).orElse(null);
+    public ResponseEntity<?> showHistory(String rfid) {
+        Product product = productRepository.findByRfid(rfid).orElse(null);
         ProductHistoryDTO productHistoryDTO = new ProductHistoryDTO();
         if(product!=null){
             List<ProductHistoryInfo> productHistory = productHistoryRespository.findByProductId(product)
