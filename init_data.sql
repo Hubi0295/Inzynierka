@@ -139,3 +139,5 @@ SELECT
     created_at - interval '5 minutes'
 FROM
     products WHERE id <= 30;
+
+UPDATE spots SET is_free=true WHERE id IN (31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48);
