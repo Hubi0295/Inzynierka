@@ -1,4 +1,18 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+INSERT INTO users (uuid, name, surname, username, password, email, role, isEnable, isLock)
+VALUES (
+           'adba5ccc-f717-4dd9-bad2-d43ac72adc4b',
+           'Jan',
+           'Kowalski',
+           'jan$kowalski1234',
+           '$2a$10$JwOJl2S5y9TDLzsVoPvnkO2BemIxFbZpXdBfhU.W3bzNp.jYxp/Bm',
+           'jan.kowalski@example.com',
+           'ADMIN',
+           true,
+           false
+       );
+INSERT INTO warehouses(uuid,name) values('cfb67e8f-6ccd-4016-b355-6cf02ce511ac','MAGAZYN1');
 WITH new_users AS (
     INSERT INTO users (uuid, name, surname, username, password, email, role, isEnable, isLock)
     VALUES
@@ -108,7 +122,7 @@ WITH
     s_ids AS (SELECT id FROM spots ORDER BY id LIMIT 30),
     o_ids AS (SELECT id FROM contractors ORDER BY id LIMIT 5),
     u_ids AS (SELECT id FROM users ORDER BY id LIMIT 6)
-INSERT INTO products (uuid, rfid, name, category_id, product_details_id, spot_id, contractor_id, user_id, is_active)
+INSERT INTO products (uuid, rfid, name,product_receipt_id,product_issue_id, category_id, product_details_id, spot_id, contractor_id, user_id, is_active)
 SELECT
     uuid_generate_v4(),
     'RFID-' || lpad(CAST(s.id AS TEXT), 5, '0'),
@@ -120,12 +134,14 @@ SELECT
             WHEN 3 THEN 'Wkręt'
             WHEN 4 THEN 'Karton'
         END,
+        0,
+        0,
     (SELECT id FROM c_ids OFFSET (s.id - 1) % 5 LIMIT 1),
     (SELECT id FROM d_ids OFFSET s.id - 1 LIMIT 1),
     (SELECT id FROM s_ids OFFSET s.id - 1 LIMIT 1),
     (SELECT id FROM o_ids OFFSET (s.id - 1) % 5 LIMIT 1),
     (SELECT id FROM u_ids OFFSET (s.id - 1) % 6 LIMIT 1),
-    true
+    false
 FROM
     generate_series(1, 30) AS s(id);
 
@@ -137,4 +153,3 @@ SELECT
     created_at - interval '5 minutes'
 FROM
     products WHERE id <= 30;
-
