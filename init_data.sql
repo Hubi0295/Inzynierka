@@ -1,18 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-INSERT INTO users (uuid, name, surname, username, password, email, role, isEnable, isLock)
-VALUES (
-           'adba5ccc-f717-4dd9-bad2-d43ac72adc4b',
-           'Jan',
-           'Kowalski',
-           'jan$kowalski1234',
-           '$2a$10$JwOJl2S5y9TDLzsVoPvnkO2BemIxFbZpXdBfhU.W3bzNp.jYxp/Bm',
-           'jan.kowalski@example.com',
-           'ADMIN',
-           true,
-           false
-       );
-INSERT INTO warehouses(uuid,name) values('cfb67e8f-6ccd-4016-b355-6cf02ce511ac','MAGAZYN1');
 WITH new_users AS (
     INSERT INTO users (uuid, name, surname, username, password, email, role, isEnable, isLock)
     VALUES
