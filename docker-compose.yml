@@ -1,6 +1,7 @@
+
 services:
   warehouse-db:
-    image: hubi0295/warehouseapp:warehouse-db-v2
+    image: hubi0295/warehouseapp:warehouse-db-v3
     pull_policy: always
     container_name: warehouse
     ports:
@@ -23,7 +24,7 @@ services:
       - warehouse-db
 
   gateway:
-    image: hubi0295/warehouseapp:gateway-service-v2
+    image: hubi0295/warehouseapp:gateway-service-v3
     pull_policy: always
     container_name: gateway-service
     ports:
@@ -38,7 +39,7 @@ services:
       eureka:
         condition: service_healthy
   auth:
-    image: hubi0295/warehouseapp:auth-service-v2
+    image: hubi0295/warehouseapp:auth-service-v4
     pull_policy: always
     container_name: auth-service
     ports:
@@ -53,7 +54,7 @@ services:
       gateway:
         condition: service_healthy
   warehouse:
-    image: hubi0295/warehouseapp:warehouse-service-v2
+    image: hubi0295/warehouseapp:warehouse-service-v5
     pull_policy: always
     container_name: warehouse-service
     ports:
@@ -68,7 +69,7 @@ services:
       auth:
         condition: service_healthy
   contractor:
-    image: hubi0295/warehouseapp:contractor-service-v2
+    image: hubi0295/warehouseapp:contractor-service-v4
     pull_policy: always
     container_name: contractor-service
     ports:
@@ -83,7 +84,7 @@ services:
       warehouse:
         condition: service_healthy
   product:
-    image: hubi0295/warehouseapp:product-service-v2
+    image: hubi0295/warehouseapp:product-service-v5
     pull_policy: always
     container_name: product-service
     ports:
@@ -98,7 +99,7 @@ services:
       contractor:
         condition: service_healthy
   product-service:
-    image: hubi0295/warehouseapp:product-service-service-v2
+    image: hubi0295/warehouseapp:product-service-service-v4
     pull_policy: always
     container_name: product-service-service
     ports:
@@ -112,5 +113,26 @@ services:
     depends_on:
       product:
         condition: service_healthy
+  warehouse-backup:
+    image: postgres:16
+    container_name: warehouse-backup
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: inzynierka
+      PGPASSWORD: inzynierka
+    ports:
+      - "55432:5432"
+    volumes:
+      - pgbackup:/var/lib/postgresql/data
+      - ./init_data.sql:/init_data.sql:ro
+      - ./init_and_backup.sh:/init_and_backup.sh:ro
+      - ./db_sync.sh:/db_sync.sh:ro
+    depends_on:
+      product-service:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/init_and_backup.sh"]
+
 volumes:
   pgdata:
+  pgbackup:
+
