@@ -67,7 +67,7 @@ SELECT
     uuid_generate_v4(),
     'M-' || sh.name || '-' || lpad(CAST(i.val AS TEXT), 2, '0'),
     sh.id,
-    true
+    false
 FROM
     inserted_shelves sh
 CROSS JOIN
