@@ -131,6 +131,15 @@ services:
       product-service:
         condition: service_healthy
     entrypoint: ["/bin/bash", "/init_and_backup.sh"]
+  frontend:
+    image: szumiik/magazynex-frontend:latest
+    
+    ports:
+      - "4200:80"
+    depends_on:
+      product-service:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata:
