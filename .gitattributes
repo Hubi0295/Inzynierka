@@ -1,0 +1,2 @@
+db_sync.sh text eol=lf
+init_and_backup.sh text eol=lf
